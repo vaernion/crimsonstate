@@ -79,7 +79,7 @@ export class Player {
       this.position.x = world.width - this.width;
     }
     if (this.position.y + this.height >= world.height) {
-      this.position.y = world.width - this.width;
+      this.position.y = world.height - this.height;
     }
   }
 }

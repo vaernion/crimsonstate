@@ -1,4 +1,5 @@
 import { Controls } from "./controls";
+import { GameState } from "./game";
 import { Player } from "./player";
 import { World } from "./world";
 
@@ -6,6 +7,7 @@ export class Debug {
   public drawDebug(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
+    state: GameState,
     controls: Controls,
     player: Player,
     world: World
@@ -13,15 +15,17 @@ export class Debug {
     ctx.save();
 
     const debugInfo = `
-player
-❤️${player.health} h${player.height}w${player.width} \
-${controls.isActivatingAbility ? "💣" : ""}
-x${player.position.x.toFixed(1)} y${player.position.y.toFixed(1)}
-+x${player.movement.x.toFixed(1)} +y${player.movement.y.toFixed(1)}
-world
-${world.width}x${world.height}
-enemies
-`;
+    state ${state.hasStarted ? "started" : ""} ${state.paused ? "paused" : ""}
+    player ${controls.isEscaping ? "+ESC" : ""}
+    ❤️${player.health} h${player.height}w${player.width} ${
+      controls.isActivatingAbility ? "💣" : ""
+    }
+    x${player.position.x.toFixed(1)} y${player.position.y.toFixed(1)}
+    +x${player.movement.x.toFixed(1)} +y${player.movement.y.toFixed(1)}
+    world
+    ${world.width}x${world.height}
+    enemies
+    `;
     const debugInfoLines = debugInfo.split("\n").filter((e) => e !== "");
 
     ctx.fillStyle = "white";
