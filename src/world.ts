@@ -1,6 +1,8 @@
 export class World {
-  width = 500;
-  height = 500;
+  public width: number;
+  height: number;
 
-  constructor() {}
+  constructor(width: number, height: number) {
+    (this.width = width), (this.height = height);
+  }
 }

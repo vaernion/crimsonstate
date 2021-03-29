@@ -24,6 +24,7 @@ a:hover {
 }
 
 #footer {
+  margin-top: 10rem;
   display: flex;
   justify-content: space-evenly;
   background-color: rgb(24, 23, 23);

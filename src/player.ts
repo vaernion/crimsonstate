@@ -1,5 +1,6 @@
 import { Controls } from "./controls";
 import { GameFrames } from "./game";
+import { World } from "./world";
 
 export class Player {
   public health = 100;
@@ -10,7 +11,7 @@ export class Player {
     x: 0,
     y: 0,
   };
-  private movement = {
+  public movement = {
     x: 0,
     y: 0,
   };
@@ -60,6 +61,7 @@ export class Player {
 
   public movePlayer(
     controls: Controls,
+    world: World,
     frames: GameFrames,
     canvasWidth: number,
     canvasHeight: number
@@ -73,11 +75,11 @@ export class Player {
     if (this.position.y - this.height <= 0) {
       this.position.y = this.height;
     }
-    if (this.position.x + this.width >= canvasWidth) {
-      this.position.x = canvasWidth - this.width;
+    if (this.position.x + this.width >= world.width) {
+      this.position.x = world.width - this.width;
     }
-    if (this.position.y + this.height >= canvasHeight) {
-      this.position.y = canvasHeight - this.width;
+    if (this.position.y + this.height >= world.height) {
+      this.position.y = world.width - this.width;
     }
   }
 }

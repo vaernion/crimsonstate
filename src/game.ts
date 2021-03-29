@@ -1,26 +1,28 @@
 import { Controls } from "./controls";
+import { Debug } from "./debug";
 import { Player } from "./player";
 import { World } from "./world";
 
 export interface GameFrames {
   count: number;
-  maxCount: number;
+  // maxCount: number;
   lastTimestamp: number;
   dt: number;
   referenceRefresh: number;
 }
 
 export class Game {
-  canvas: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
+  public canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
 
+  private debug = new Debug();
   private controls: Controls = new Controls(document);
   private player: Player = new Player();
-  private world: World = new World();
+  private world: World = new World(500, 500);
 
   private frames: GameFrames = {
     count: 0,
-    maxCount: 100,
+    // maxCount: 100,
     lastTimestamp: 0,
     dt: 0,
     referenceRefresh: 1000 / 60,
@@ -54,9 +56,12 @@ export class Game {
       this.frames.count++;
       return;
     }
+
+    // player movement
     this.frames.dt = timestamp - this.frames.lastTimestamp;
     this.player.movePlayer(
       this.controls,
+      this.world,
       this.frames,
       this.canvas.width,
       this.canvas.height
@@ -67,10 +72,11 @@ export class Game {
   }
 
   private draw() {
+    // background
     this.ctx.fillStyle = "teal";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    // console.log(this.player.position);
 
+    // player
     this.ctx.fillStyle = "yellow";
     this.ctx.fillRect(
       // divide by 2 to keep x and y in center of player sprite
@@ -80,7 +86,9 @@ export class Game {
       this.player.height
     );
 
+    // player outline
     this.ctx.beginPath();
+    this.ctx.fillStyle = "red";
     this.ctx.arc(
       this.player.position.x,
       this.player.position.y,
@@ -89,5 +97,16 @@ export class Game {
       2 * Math.PI
     );
     this.ctx.stroke();
+
+    // debug info
+    if (this.controls.showDebug) {
+      this.debug.drawDebug(
+        this.canvas,
+        this.ctx,
+        this.controls,
+        this.player,
+        this.world
+      );
+    }
   }
 }
