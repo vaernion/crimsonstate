@@ -15,17 +15,22 @@ export class Debug {
   ) {
     ctx.save();
 
+    const visibleArea = world.visibleArea(canvas, player);
+
     const debugInfo = `
-    state ${state.hasStarted ? "started" : ""} ${state.paused ? "paused" : ""}
-    player ${controls.isEscaping ? "+ESC" : ""}
+    $state ${state.hasStarted ? "started" : ""} ${state.paused ? "paused" : ""}
+    $player ${controls.isEscaping ? "+ESC" : ""}
     ❤️${player.health.toFixed(0)} h${player.height}w${player.width} ${
       controls.isActivatingAbility ? "💣" : ""
     }
     x${player.position.x.toFixed(1)} y${player.position.y.toFixed(1)}
-    +x${player.movement.x.toFixed(1)} +y${player.movement.y.toFixed(1)}
-    world ⌛${state.timeSpeed}
+    +x${player.velocity.x.toFixed(1)} +y${player.velocity.y.toFixed(1)}
+    $world ⌛${state.timeSpeed}
     ${world.width}x${world.height}
-    enemies
+    $camera
+    x${visibleArea.xStart.toFixed(1)} y${visibleArea.yStart.toFixed(1)}
+    y${visibleArea.xEnd.toFixed(1)} y${visibleArea.yEnd.toFixed(1)}
+    $enemies
     `;
     const debugInfoLines = debugInfo.split("\n").filter((e) => e !== "");
 

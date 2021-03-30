@@ -5,14 +5,17 @@ import { World } from "./world";
 
 export class Player extends MovingEntity {
   public health = 100;
-  public width = 5;
-  public height = 5;
+  public width = 20;
+  public height = 30;
 
-  constructor() {
+  constructor(world: World) {
     super();
+    this.position.x = world.width / 2;
+    this.position.y = world.height / 2;
+    this.movementSpeed = 15;
   }
 
-  private calculateMovement(controls: Controls, frames: GameFrames) {
+  private calculateVelocity(controls: Controls, frames: GameFrames) {
     const dtFactor = frames.dt / 1000;
     const movement = { x: 0, y: 0 };
 
@@ -42,8 +45,8 @@ export class Player extends MovingEntity {
     movement.x *= (this.movementSpeed * frames.dt) / frames.referenceRefresh;
     movement.y *= (this.movementSpeed * frames.dt) / frames.referenceRefresh;
 
-    this.movement.x = movement.x;
-    this.movement.y = movement.y;
+    this.velocity.x = movement.x;
+    this.velocity.y = movement.y;
 
     // if (frames.count % 60 === 0) {
     //   // console.log("mag", magnitude);
@@ -51,29 +54,32 @@ export class Player extends MovingEntity {
     // }
   }
 
-  private calculateCollision() {}
+  private fixEntityCollision() {}
 
-  public movePlayer(
-    controls: Controls,
-    world: World,
-    frames: GameFrames,
-    canvasWidth: number,
-    canvasHeight: number
-  ) {
-    this.calculateMovement(controls, frames);
-    this.position.x += this.movement.x;
-    this.position.y += this.movement.y;
-    if (this.position.x - this.width <= 0) {
-      this.position.x = this.width;
+  private fixEdgeCollision(world: World) {
+    // left edge
+    if (this.position.x + this.width / 2 - this.width <= 0) {
+      this.position.x = this.width / 2;
     }
-    if (this.position.y - this.height <= 0) {
-      this.position.y = this.height;
+    // top edge
+    if (this.position.y - this.height / 2 <= 0) {
+      this.position.y = this.height / 2;
     }
-    if (this.position.x + this.width >= world.width) {
-      this.position.x = world.width - this.width;
+    // right edge
+    if (this.position.x + this.width / 2 >= world.width) {
+      this.position.x = world.width - this.width / 2;
     }
-    if (this.position.y + this.height >= world.height) {
-      this.position.y = world.height - this.height;
+    // bottom edge
+    if (this.position.y + this.height / 2 >= world.height) {
+      this.position.y = world.height - this.height / 2;
     }
+  }
+
+  public move(controls: Controls, world: World, frames: GameFrames) {
+    this.calculateVelocity(controls, frames);
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
+    this.fixEntityCollision();
+    this.fixEdgeCollision(world);
   }
 }

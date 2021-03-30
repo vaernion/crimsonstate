@@ -8,7 +8,6 @@ import { World } from "./world";
 
 export interface GameFrames {
   count: number;
-  // maxCount: number;
   lastTimestamp: number;
   dt: number;
   referenceRefresh: number;
@@ -27,8 +26,8 @@ export class Game {
 
   private menu: Menu = new Menu();
   private controls: Controls = new Controls(document);
-  private player: Player = new Player();
   private world: World;
+  private player: Player;
 
   private state: GameState = {
     paused: true,
@@ -37,7 +36,6 @@ export class Game {
   };
   private frames: GameFrames = {
     count: 0,
-    // maxCount: 100,
     lastTimestamp: 0,
     dt: 0,
     referenceRefresh: 1000 / 60,
@@ -51,6 +49,7 @@ export class Game {
     worldHeight: number
   ) {
     this.world = new World(worldWidth, worldHeight);
+    this.player = new Player(this.world);
     this.canvas = canvas;
     const ctx = canvas.getContext("2d");
     if (ctx) {
@@ -68,8 +67,8 @@ export class Game {
 
   restart() {
     this.controls = new Controls(document);
-    this.player = new Player();
     this.world = new World(this.world.width, this.world.height);
+    this.player = new Player(this.world);
   }
 
   public initLoop() {
@@ -154,8 +153,13 @@ export class Game {
 
     // delta time
     frames.dt = (timestamp - frames.lastTimestamp) * state.timeSpeed;
+
     // player movement
-    player.movePlayer(controls, world, frames, canvas.width, canvas.height);
+    player.move(controls, world, frames);
+
+    // other entitites movement
+
+    // calculate damage
 
     frames.lastTimestamp = timestamp;
     frames.count++;
@@ -183,16 +187,63 @@ export class Game {
       }
       return;
     }
+
+    // canvas x600y400
+    // world 1000x1000
+    // player x500 y500 (center)
+    // top left - x: 500 - canvas.x/2 == 200, y: 500 - canvas.y/2 == 300
+    // bottom right: x: 500 + canvas.x/2 = 800, y: 500 + canvas.y/2 = 700
+    // desired visible area: x200y300 to x800y700
+
+    // used for centering camera on player
+    const visibleArea = world.visibleArea(canvas, player);
+
     // background
     ctx.fillStyle = worldColor.bg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // world edge
     ctx.fillStyle = worldColor.edge;
-    ctx.fillRect(0, 0, 0, 0); // top
-    ctx.fillRect(0, world.height, world.width, world.height); // bottom
-    ctx.fillRect(0, 0, 0, 0); // left
-    ctx.fillRect(world.width, 0, 10000, 10000); // right
+
+    // top edge
+    ctx.fillRect(
+      0,
+      0,
+      visibleArea.width,
+      Math.max(0, visibleArea.height - visibleArea.yEnd)
+    );
+
+    // left edge
+    ctx.fillRect(
+      0,
+      0,
+      Math.max(0, visibleArea.width - visibleArea.xEnd),
+      canvas.height
+    );
+
+    // bottom edge
+    const bottomEdgeHeight = Math.min(
+      visibleArea.height,
+      (visibleArea.yStart - world.height) * -1
+    );
+    ctx.fillRect(
+      0,
+      bottomEdgeHeight,
+      visibleArea.width,
+      visibleArea.height - bottomEdgeHeight
+    );
+
+    // right edge
+    const rightEdgeWidth = Math.min(
+      visibleArea.width,
+      (visibleArea.xStart - world.width) * -1
+    );
+    ctx.fillRect(
+      rightEdgeWidth,
+      0,
+      visibleArea.width - rightEdgeWidth,
+      visibleArea.height
+    );
 
     // debug info
     if (controls.showDebug) {
@@ -203,8 +254,8 @@ export class Game {
     ctx.fillStyle = playerColor.fill;
     ctx.fillRect(
       // divide by 2 to keep x and y in center of player sprite
-      player.position.x - player.width / 2,
-      player.position.y - player.height / 2,
+      canvas.width / 2 - player.width / 2,
+      canvas.height / 2 - player.height / 2,
       player.width,
       player.height
     );
@@ -212,22 +263,28 @@ export class Game {
     // player outline
     ctx.beginPath();
     ctx.strokeStyle = playerColor.outline;
-    ctx.arc(player.position.x, player.position.y, player.width, 0, 2 * Math.PI);
+    ctx.arc(
+      canvas.width / 2,
+      canvas.height / 2,
+      player.width / 2,
+      0,
+      2 * Math.PI
+    );
     ctx.stroke();
 
     // HUD
     // health (display around player?)
     ctx.fillStyle = hudColor.health;
     ctx.fillRect(
-      canvas.width * 0.02,
-      canvas.height * 0.02,
-      canvas.width * 0.02,
-      canvas.width * 0.02
+      canvas.width * 0.03,
+      canvas.height * 0.03,
+      canvas.width * 0.03,
+      canvas.width * 0.03
     );
     ctx.fillText(
       player.health.toFixed(0),
-      canvas.width * 0.02,
-      canvas.height * 0.02 + canvas.width * 0.04
+      canvas.width * 0.03,
+      canvas.height * 0.03 + canvas.width * 0.05
     );
     // weapon
     //ability?

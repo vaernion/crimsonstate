@@ -6,9 +6,9 @@ export class Entity {
 }
 
 export class MovingEntity extends Entity {
-  public movement = {
+  public velocity = {
     x: 0,
     y: 0,
   };
-  public movementSpeed = 5; // pixels?
+  public movementSpeed = 1; // factor
 }

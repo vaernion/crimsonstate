@@ -15,7 +15,7 @@
 
 ### Short term todo
 
-asap: refactor draw & update, center camera on player, draw world edge (redo after camera change), buffer only one non-movement key at a time to greatly simplify conditionals (controls.specialBuffer = "esc" || "activate" || "")
+asap: refactor draw & update, buffer only one non-movement key at a time to greatly simplify conditionals (controls.specialBuffer = "esc" || "activate" || "")
 
 then: enemies/entities, damage model, weapon
 
@@ -26,13 +26,13 @@ then: enemies/entities, damage model, weapon
 | Game                | loop & hierarchy          |                                                | :heavy_check_mark: |
 | Controls            | intercept & buffer input  |                                                | :heavy_check_mark: |
 | Player              | movement                  |                                                | :heavy_check_mark: |
-| Player              | collision                 |                                                |                    |
+| Player              | entity collision          |                                                |                    |
 | World               | world constructor         | only determines max area for now               | :heavy_check_mark: |
 | Game                | draw world border         |                                                | :heavy_check_mark: |
 | Menu Controls       | pause game                | conditional update in Game                     | :heavy_check_mark: |
 | Menu Controls       | select options            | wasd and/or mouse                              | :heavy_check_mark: |
 | Game Menu Controls  | start/reset               | hotkey too?                                    | :heavy_check_mark: |
-| Game Player         | camera follows player     |                                                |                    |
+| Game Player         | camera follows player     |                                                | :heavy_check_mark: |
 | Game/Save           | settings/score/unlocks?   | localstate JSON                                |                    |
 | Enemy/Entity        | spawn outside vision      |                                                |                    |
 | Enemy/Entity        | move towards player       |                                                |                    |
@@ -73,7 +73,9 @@ Game
 |    |-- health
 |    |-- width/height
 |    |-- position = {x,y}
-|    |-- movePlayer()
+|    |-- movement = {x,y}
+|    |-- movementSpeed
+|    |-- move()
 | World
 | Enemies/Entities?
 ```

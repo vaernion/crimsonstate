@@ -1,6 +1,6 @@
 export const constants = {
   world: {
-    width: 600,
-    height: 400,
+    width: 1000,
+    height: 1000,
   },
 };
