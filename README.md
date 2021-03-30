@@ -17,7 +17,7 @@
 
 asap: refactor draw & update, center camera on player, draw world edge (redo after camera change), buffer only one non-movement key at a time to greatly simplify conditionals (controls.specialBuffer = "esc" || "activate" || "")
 
-then: enemies/entities, damage model,
+then: enemies/entities, damage model, weapon
 
 ### Features
 
@@ -63,14 +63,17 @@ then: enemies/entities, damage model,
 
 ### Structure so far
 
-|Game (loop)
-| | canvas
-| | Debug
-| | Controls
-| | Player
-| | | health
-| | | width/height
-| | | position = {x,y}
-| | | movePlayer()
-| | World
-| | Enemies/Entities?
+```js
+Game
+|-- canvas
+|-- Debug
+|-- Menu
+|-- Controls
+|-- Player
+|    |-- health
+|    |-- width/height
+|    |-- position = {x,y}
+|    |-- movePlayer()
+| World
+| Enemies/Entities?
+```

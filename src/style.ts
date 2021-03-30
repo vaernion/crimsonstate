@@ -6,3 +6,29 @@ export const colors = {
   c5: "#344e76",
   c6: "#2f4858",
 };
+
+export const debugColor = {
+  text: "white",
+  shadow: "black",
+};
+
+export const menuColor = {
+  bg: colors.c6,
+  button: colors.c3,
+  buttonSelected: colors.c2,
+  buttonText: "black",
+};
+
+export const playerColor = {
+  fill: "yellow",
+  outline: "red",
+};
+
+export const worldColor = {
+  bg: "teal",
+  edge: "grey",
+};
+
+export const hudColor = {
+  health: "red",
+};

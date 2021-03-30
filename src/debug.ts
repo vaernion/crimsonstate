@@ -1,6 +1,7 @@
 import { Controls } from "./controls";
 import { GameState } from "./game";
 import { Player } from "./player";
+import { debugColor } from "./style";
 import { World } from "./world";
 
 export class Debug {
@@ -17,21 +18,21 @@ export class Debug {
     const debugInfo = `
     state ${state.hasStarted ? "started" : ""} ${state.paused ? "paused" : ""}
     player ${controls.isEscaping ? "+ESC" : ""}
-    ❤️${player.health} h${player.height}w${player.width} ${
+    ❤️${player.health.toFixed(0)} h${player.height}w${player.width} ${
       controls.isActivatingAbility ? "💣" : ""
     }
     x${player.position.x.toFixed(1)} y${player.position.y.toFixed(1)}
     +x${player.movement.x.toFixed(1)} +y${player.movement.y.toFixed(1)}
-    world
+    world ⌛${state.timeSpeed}
     ${world.width}x${world.height}
     enemies
     `;
     const debugInfoLines = debugInfo.split("\n").filter((e) => e !== "");
 
-    ctx.fillStyle = "white";
+    ctx.fillStyle = debugColor.text;
     ctx.shadowOffsetX = 3;
     ctx.shadowOffsetY = 3;
-    ctx.shadowColor = "black";
+    ctx.shadowColor = debugColor.shadow;
     ctx.shadowBlur = 3;
     const fontSize = parseInt(ctx.font.split(" ")[0]) * 1.2;
     ctx.font = `${fontSize}px sans-serif`;

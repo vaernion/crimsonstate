@@ -1,22 +1,16 @@
 import { Controls } from "./controls";
+import { MovingEntity } from "./entity";
 import { GameFrames } from "./game";
 import { World } from "./world";
 
-export class Player {
+export class Player extends MovingEntity {
   public health = 100;
-  private movementSpeed = 5; // pixels?
   public width = 5;
   public height = 5;
-  public position = {
-    x: 0,
-    y: 0,
-  };
-  public movement = {
-    x: 0,
-    y: 0,
-  };
 
-  constructor() {}
+  constructor() {
+    super();
+  }
 
   private calculateMovement(controls: Controls, frames: GameFrames) {
     const dtFactor = frames.dt / 1000;

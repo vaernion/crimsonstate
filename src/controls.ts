@@ -7,12 +7,14 @@ enum ControlsKeys {
   left = "ArrowLeft",
   down = "ArrowDown",
   right = "ArrowRight",
-  h = "h",
-  space = " ",
-  enter = "Enter",
+  h = "h", // help
+  space = " ", // ability/select
+  enter = "Enter", // alternative for space
   esc = "Escape",
-  r = "r",
-  pipe = "|",
+  // r = "r", // reload
+  v = "v", // restart
+  z = "z", // time skip
+  pipe = "|", // show debug info
 }
 
 export class Controls {
@@ -29,6 +31,7 @@ export class Controls {
   // unpause, go back one step in menu etc.
   public isEscaping: boolean = false;
   public isRestarting: boolean = false;
+  public isSpeeding: boolean = false;
 
   constructor(context: Document) {
     this.document = context;
@@ -57,8 +60,11 @@ export class Controls {
       case ControlsKeys.enter:
         if (ev.type === "keydown") this.handleAbility();
         break;
-      case ControlsKeys.r:
+      case ControlsKeys.v:
         if (ev.type === "keydown") this.isRestarting = true;
+        break;
+      case ControlsKeys.z:
+        if (ev.type === "keydown") this.isSpeeding = true;
         break;
       case ControlsKeys.w:
       case ControlsKeys.a:

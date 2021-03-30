@@ -1,6 +1,6 @@
 import { Controls } from "./controls";
 import { GameState } from "./game";
-import { colors } from "./style";
+import { colors, menuColor } from "./style";
 
 export class Menu {
   public isShowingMenu: boolean = true;
@@ -60,14 +60,18 @@ export class Menu {
   ) {
     ctx.save();
 
-    ctx.fillStyle = colors.c6;
+    // background
+    ctx.fillStyle = menuColor.bg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const itemHeight = canvas.height * 0.1;
 
     // draw menu buttons
     this.menuItems.forEach((item, idx) => {
-      ctx.fillStyle = this.selectedItemIndex === idx ? colors.c2 : colors.c3;
+      ctx.fillStyle =
+        this.selectedItemIndex === idx
+          ? menuColor.buttonSelected
+          : menuColor.button;
 
       ctx.fillRect(
         canvas.width * 0.1,
@@ -77,7 +81,7 @@ export class Menu {
       );
 
       // button text
-      ctx.fillStyle = colors.c6;
+      ctx.fillStyle = menuColor.buttonText;
       ctx.font = "20px arial";
       //   ctx.textBaseline = "top";
       ctx.fillText(

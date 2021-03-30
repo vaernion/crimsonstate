@@ -3,6 +3,7 @@ import { Controls } from "./controls";
 import { Debug } from "./debug";
 import { Menu } from "./menu";
 import { Player } from "./player";
+import { hudColor, playerColor, worldColor } from "./style";
 import { World } from "./world";
 
 export interface GameFrames {
@@ -15,6 +16,7 @@ export interface GameFrames {
 export interface GameState {
   paused: boolean;
   hasStarted: boolean;
+  timeSpeed: number;
 }
 
 export class Game {
@@ -31,6 +33,7 @@ export class Game {
   private state: GameState = {
     paused: true,
     hasStarted: false,
+    timeSpeed: 2.0, // for slow motion & configurable game speed
   };
   private frames: GameFrames = {
     count: 0,
@@ -82,7 +85,8 @@ export class Game {
       this.controls,
       this.menu,
       this.player,
-      this.world
+      this.world,
+      this.restart.bind(this)
     );
     this.draw(
       this.canvas,
@@ -105,7 +109,8 @@ export class Game {
     controls: Controls,
     menu: Menu,
     player: Player,
-    world: World
+    world: World,
+    restart: () => void
   ): void {
     // skip certain frames mod 10 for delta time testing
     // if ([0, 1, 3, 5, 6, 7].includes(this.frames.count % 10)) {
@@ -114,7 +119,12 @@ export class Game {
     // }
 
     if (controls.isRestarting) {
-      this.restart();
+      restart();
+    }
+
+    if (controls.isSpeeding) {
+      state.timeSpeed = state.timeSpeed > 1 ? 1.0 : 2.0;
+      controls.isSpeeding = false;
     }
 
     if (controls.isEscaping) {
@@ -142,8 +152,9 @@ export class Game {
       return;
     }
 
+    // delta time
+    frames.dt = (timestamp - frames.lastTimestamp) * state.timeSpeed;
     // player movement
-    frames.dt = timestamp - frames.lastTimestamp;
     player.movePlayer(controls, world, frames, canvas.width, canvas.height);
 
     frames.lastTimestamp = timestamp;
@@ -173,11 +184,11 @@ export class Game {
       return;
     }
     // background
-    ctx.fillStyle = "teal";
+    ctx.fillStyle = worldColor.bg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // world edge
-    ctx.fillStyle = "grey";
+    ctx.fillStyle = worldColor.edge;
     ctx.fillRect(0, 0, 0, 0); // top
     ctx.fillRect(0, world.height, world.width, world.height); // bottom
     ctx.fillRect(0, 0, 0, 0); // left
@@ -189,7 +200,7 @@ export class Game {
     }
 
     // player
-    ctx.fillStyle = "yellow";
+    ctx.fillStyle = playerColor.fill;
     ctx.fillRect(
       // divide by 2 to keep x and y in center of player sprite
       player.position.x - player.width / 2,
@@ -200,8 +211,25 @@ export class Game {
 
     // player outline
     ctx.beginPath();
-    ctx.fillStyle = "red";
+    ctx.strokeStyle = playerColor.outline;
     ctx.arc(player.position.x, player.position.y, player.width, 0, 2 * Math.PI);
     ctx.stroke();
+
+    // HUD
+    // health (display around player?)
+    ctx.fillStyle = hudColor.health;
+    ctx.fillRect(
+      canvas.width * 0.02,
+      canvas.height * 0.02,
+      canvas.width * 0.02,
+      canvas.width * 0.02
+    );
+    ctx.fillText(
+      player.health.toFixed(0),
+      canvas.width * 0.02,
+      canvas.height * 0.02 + canvas.width * 0.04
+    );
+    // weapon
+    //ability?
   }
 }
