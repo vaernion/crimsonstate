@@ -15,7 +15,7 @@
 
 ### Short term todo
 
-asap: refactor draw & update, buffer only one non-movement key at a time to greatly simplify conditionals (controls.specialBuffer = "esc" || "activate" || "")
+asap: acceleration, enemies, projectiles
 
 then: enemies/entities, damage model, weapon
 
@@ -33,7 +33,7 @@ then: enemies/entities, damage model, weapon
 | Menu Controls       | select options            | wasd and/or mouse                              | :heavy_check_mark: |
 | Game Menu Controls  | start/reset               | hotkey too?                                    | :heavy_check_mark: |
 | Game Player         | camera follows player     |                                                | :heavy_check_mark: |
-| HUD                 | hud draw method           | extract from Game                              |                    |
+| HUD                 | hud draw method           | extract from Game                              | :heavy_check_mark: |
 | Game/Save           | settings/score/unlocks?   | localstate JSON                                |                    |
 | Enemy/Entity        | spawn outside vision      |                                                |                    |
 | Enemy/Entity        | move towards player       |                                                |                    |

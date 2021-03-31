@@ -1,4 +1,4 @@
-enum ControlsKeys {
+export enum ControlsKeys {
   w = "w",
   a = "a",
   s = "s",
@@ -17,6 +17,14 @@ enum ControlsKeys {
   pipe = "|", // show debug info
 }
 
+type SpecialKeyBuffer =
+  | ""
+  | ControlsKeys.space
+  | ControlsKeys.enter
+  | ControlsKeys.esc
+  | ControlsKeys.v
+  | ControlsKeys.z;
+
 export class Controls {
   private document: Document;
   public showDebug: boolean = process.env.NODE_ENV === "development";
@@ -26,12 +34,13 @@ export class Controls {
   public isMovingLeft: boolean = false;
   public isMovingRight: boolean = false;
   public isMovingDown: boolean = false;
+  public specialKeyBuffer: SpecialKeyBuffer = "";
   // can't be canceled, set to false by game after activation finishes
-  public isActivatingAbility: boolean = false;
+  // public isActivatingAbility: boolean = false;
   // unpause, go back one step in menu etc.
-  public isEscaping: boolean = false;
-  public isRestarting: boolean = false;
-  public isSpeeding: boolean = false;
+  // public isEscaping: boolean = false;
+  // public isRestarting: boolean = false;
+  // public isSpeeding: boolean = false;
 
   constructor(context: Document) {
     this.document = context;
@@ -54,17 +63,17 @@ export class Controls {
         if (ev.type === "keydown") this.handleHelp();
         break;
       case ControlsKeys.esc:
-        if (ev.type === "keydown") this.isEscaping = !this.isEscaping;
+        if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.esc;
         break;
       case ControlsKeys.space:
       case ControlsKeys.enter:
         if (ev.type === "keydown") this.handleAbility();
         break;
       case ControlsKeys.v:
-        if (ev.type === "keydown") this.isRestarting = true;
+        if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.v;
         break;
       case ControlsKeys.z:
-        if (ev.type === "keydown") this.isSpeeding = true;
+        if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.z;
         break;
       case ControlsKeys.w:
       case ControlsKeys.a:
@@ -108,6 +117,6 @@ export class Controls {
   }
 
   private handleAbility() {
-    this.isActivatingAbility = true;
+    this.specialKeyBuffer = ControlsKeys.space;
   }
 }

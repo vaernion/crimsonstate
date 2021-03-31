@@ -1,5 +1,5 @@
 import { constants } from "./constants";
-import { Controls } from "./controls";
+import { Controls, ControlsKeys } from "./controls";
 import { Debug } from "./debug";
 import { HUD } from "./hud";
 import { Menu } from "./menu";
@@ -50,6 +50,13 @@ export class Game {
     }
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
+  }
+
+  start() {
+    this.state.hasStarted = true;
+    this.state.paused = false;
+    this.menu.isStartingGame = false;
+    this.menu.isShowingMenu = false;
   }
 
   pause() {
@@ -112,39 +119,55 @@ export class Game {
     //   return;
     // }
 
-    if (controls.isRestarting) {
+    // restart
+    if (controls.specialKeyBuffer === ControlsKeys.v) {
       return this.restart();
     }
 
-    if (controls.isSpeeding) {
-      state.timeSpeed = state.timeSpeed > 1 ? 1.0 : 2.0;
-      controls.isSpeeding = false;
+    // change speed (time factor)
+    else if (controls.specialKeyBuffer === ControlsKeys.z) {
+      state.timeSpeed = state.timeSpeed > 1 ? 1.0 : 3.0;
     }
-
-    // pause or exit menu depending on context
-    if (controls.isEscaping) {
-      // open pause menu
-      if (state.hasStarted && !state.paused) {
+    // use ability
+    else if (
+      !menu.isShowingMenu &&
+      !state.paused &&
+      controls.specialKeyBuffer === ControlsKeys.space
+    ) {
+      player.useAbility();
+    }
+    // open level up screen
+    else if (false) {
+      // state.paused = true
+      // state.isShowingLevelUp = true
+    }
+    // open menu or close level up screen
+    else if (
+      controls.specialKeyBuffer === ControlsKeys.esc &&
+      !menu.isShowingMenu &&
+      !menu.isCoolingDown(timestamp)
+    ) {
+      // open menu & pause
+      if (state.hasStarted && !menu.isShowingMenu) {
         state.paused = true;
         menu.isShowingMenu = true;
-        controls.isActivatingAbility = false;
-        // navigate menu
-      } else if (state.paused && menu.isShowingMenu) {
-        // go back one step here, add condition in previous block
-        controls.isEscaping = false;
+        controls.specialKeyBuffer = "";
+        menu.update(controls, timestamp, state);
+        // close level up & resume
+      } else if (false) {
+        // state.paused = false
+        // state.isShowingLevelUp = false
       }
     }
-
-    // redundant check to ensure game wont run in background
-    if (state.paused && menu.isShowingMenu) {
-      menu.update(controls, timestamp);
-      if (menu.isStartingGame) {
-        state.hasStarted = true;
-        state.paused = false;
-        menu.isStartingGame = false;
-        menu.isShowingMenu = false;
-        controls.isEscaping = false;
-      }
+    // start
+    else if (menu.isStartingGame) {
+      this.start();
+      return;
+    }
+    // menu navigation, check to ensure game wont run in background
+    else if (state.paused && menu.isShowingMenu) {
+      // console.count("men uupdate");
+      menu.update(controls, timestamp, state);
       return;
     }
 
@@ -154,9 +177,11 @@ export class Game {
     // player movement
     player.update(controls, world, frames);
 
-    // other entitites movement
+    // other entitites movement or triggers
     // for (const entity in staticEntities) {}
     // for (const entity in movingEntitites) {}
+
+    // calculate ability
 
     // calculate damage
     // player.calculateDamage() ?
@@ -166,6 +191,7 @@ export class Game {
 
     frames.lastTimestamp = timestamp;
     frames.count++;
+    controls.specialKeyBuffer = "";
   }
 
   draw(

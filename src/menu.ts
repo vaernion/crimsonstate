@@ -1,37 +1,29 @@
-import { Controls } from "./controls";
+import { Controls, ControlsKeys } from "./controls";
 import { GameState } from "./game";
 import { colors, menuColor } from "./style";
 
 export class Menu {
   public isShowingMenu: boolean = true;
   public isStartingGame: boolean = false;
-  private menuItems = [
-    new MenuItem("Start", () => {
-      this.isStartingGame = true;
-    }),
-    new MenuItem("Profile", () => {
-      console.log("profile");
-    }),
-    new MenuItem("Settings", () => {
-      console.log("settings");
-    }),
-    new MenuItem("Credits", () => {
-      console.log("credits");
-    }),
-  ];
+  private menuItems = this.initMenuItems();
   private selectedItemIndex: number = 0;
-  private lastInteractionTimestamp: number = 0;
-  private interactionCooldown: number = 250; // necessary to prevent one interaction per update
+  private lastMenuInteractionTimestamp: DOMHighResTimeStamp = 0;
+  private menuInteractionCooldown: number = 250; // necessary to prevent one interaction per update
 
-  update(controls: Controls, timestamp: DOMHighResTimeStamp) {
-    if (
-      !(
-        controls.isMovingUp ||
-        controls.isMovingDown ||
-        controls.isActivatingAbility
-      ) ||
-      this.lastInteractionTimestamp + this.interactionCooldown > timestamp
-    ) {
+  public isCoolingDown(timestamp: DOMHighResTimeStamp) {
+    return (
+      this.lastMenuInteractionTimestamp + this.menuInteractionCooldown >
+      timestamp
+    );
+  }
+
+  public update(
+    controls: Controls,
+    timestamp: DOMHighResTimeStamp,
+    state: GameState
+  ) {
+    // interaction cooldown
+    if (this.isCoolingDown(timestamp)) {
       return;
     }
     // up
@@ -40,20 +32,29 @@ export class Menu {
         this.selectedItemIndex - 1 >= 0
           ? this.selectedItemIndex - 1
           : this.menuItems.length - 1;
-
-      // down
-    } else if (controls.isMovingDown) {
+    }
+    // down
+    else if (controls.isMovingDown) {
       this.selectedItemIndex =
         (this.selectedItemIndex + 1) % this.menuItems.length;
-      // activate
-    } else if (controls.isActivatingAbility) {
+    }
+    // activate
+    else if (controls.specialKeyBuffer === ControlsKeys.space) {
       this.menuItems[this.selectedItemIndex].onactivation();
     }
-    controls.isActivatingAbility = false;
-    this.lastInteractionTimestamp = timestamp;
+    // return from submenu or resume game
+    else if (
+      controls.specialKeyBuffer === ControlsKeys.esc &&
+      state.hasStarted
+    ) {
+      this.isShowingMenu = false;
+    }
+
+    controls.specialKeyBuffer = "";
+    this.lastMenuInteractionTimestamp = timestamp;
   }
 
-  draw(
+  public draw(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
     state: GameState
@@ -102,13 +103,31 @@ export class Menu {
 
     ctx.restore();
   }
+
+  private initMenuItems() {
+    return [
+      new MenuItem("Start", () => {
+        this.isStartingGame = true;
+      }),
+      new MenuItem("Profile", () => {
+        console.log("profile");
+      }),
+      new MenuItem("Settings", () => {
+        console.log("settings");
+      }),
+      new MenuItem("Credits", () => {
+        console.log("credits");
+      }),
+    ];
+  }
 }
 
 class MenuItem {
   public label: string;
   public onactivation: () => void;
-  constructor(label: string, onclick: () => void) {
+
+  constructor(label: string, onactivation: () => void) {
     this.label = label;
-    this.onactivation = onclick;
+    this.onactivation = onactivation;
   }
 }

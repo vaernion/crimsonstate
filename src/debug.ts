@@ -1,4 +1,4 @@
-import { Controls } from "./controls";
+import { Controls, ControlsKeys } from "./controls";
 import { GameState } from "./game";
 import { Player } from "./player";
 import { debugColor } from "./style";
@@ -18,10 +18,11 @@ export class Debug {
     const visibleArea = world.visibleArea(canvas, player);
 
     const debugInfo = `
+    ${controls.specialKeyBuffer}
     $state ${state.hasStarted ? "started" : ""} ${state.paused ? "paused" : ""}
-    $player ${controls.isEscaping ? "+ESC" : ""}
+    $player ${controls.specialKeyBuffer === ControlsKeys.esc ? "+ESC" : ""}
     ❤️${player.health.toFixed(0)} h${player.height}w${player.width} ${
-      controls.isActivatingAbility ? "💣" : ""
+      controls.specialKeyBuffer === ControlsKeys.space ? "💣" : ""
     }
     x${player.position.x.toFixed(1)} y${player.position.y.toFixed(1)}
     +x${player.velocity.x.toFixed(1)} +y${player.velocity.y.toFixed(1)}

@@ -113,4 +113,6 @@ export class Player extends MovingEntity {
       this.position.y = world.height - this.height / 2;
     }
   }
+
+  public useAbility() {}
 }
