@@ -33,6 +33,7 @@ then: enemies/entities, damage model, weapon
 | Menu Controls       | select options            | wasd and/or mouse                              | :heavy_check_mark: |
 | Game Menu Controls  | start/reset               | hotkey too?                                    | :heavy_check_mark: |
 | Game Player         | camera follows player     |                                                | :heavy_check_mark: |
+| HUD                 | hud draw method           | extract from Game                              |                    |
 | Game/Save           | settings/score/unlocks?   | localstate JSON                                |                    |
 | Enemy/Entity        | spawn outside vision      |                                                |                    |
 | Enemy/Entity        | move towards player       |                                                |                    |
@@ -68,14 +69,16 @@ Game
 |-- canvas
 |-- Debug
 |-- Menu
+|-- HUD
 |-- Controls
+|-- World
+|   |-- width/height
 |-- Player
-|    |-- health
-|    |-- width/height
-|    |-- position = {x,y}
-|    |-- movement = {x,y}
-|    |-- movementSpeed
-|    |-- move()
-| World
-| Enemies/Entities?
+|   |-- health
+|   |-- width/height
+|   |-- position = {x,y}
+|   |-- movement = {x,y}
+|   |-- movementSpeed
+|   |-- move()
+|-- Enemies/Entities?
 ```

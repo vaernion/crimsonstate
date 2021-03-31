@@ -1,13 +1,10 @@
 import { constants } from "./constants";
 import { Game } from "./game";
 
-export const canvasWidthFraction = 0.4;
-export const canvasHeightFraction = 0.55;
-
 function init() {
   const canvas = document.getElementById("game-canvas");
-  const canvasWidth = window.innerWidth * canvasWidthFraction;
-  const canvasHeight = window.innerHeight * canvasWidthFraction;
+  const canvasWidth = window.innerWidth * constants.canvasWidthFraction;
+  const canvasHeight = window.innerHeight * constants.canvasWidthFraction;
 
   if (canvas instanceof HTMLCanvasElement) {
     const game = new Game(

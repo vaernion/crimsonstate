@@ -1,4 +1,14 @@
 import { Player } from "./player";
+import { worldColor } from "./style";
+
+export interface VisibleArea {
+  xStart: number;
+  yStart: number;
+  xEnd: number;
+  yEnd: number;
+  width: number;
+  height: number;
+}
 
 export class World {
   public width: number;
@@ -8,7 +18,7 @@ export class World {
     (this.width = width), (this.height = height);
   }
 
-  public visibleArea(canvas: HTMLCanvasElement, player: Player) {
+  public visibleArea(canvas: HTMLCanvasElement, player: Player): VisibleArea {
     return {
       xStart: player.position.x - canvas.width / 2,
       yStart: player.position.y - canvas.height / 2,
@@ -17,5 +27,71 @@ export class World {
       width: canvas.width,
       height: canvas.height,
     };
+  }
+
+  public draw(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    visibleArea: VisibleArea
+  ) {
+    this.drawBackground(canvas, ctx, visibleArea);
+    this.drawEdge(canvas, ctx, visibleArea);
+  }
+
+  public drawBackground(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    visibleArea: VisibleArea
+  ) {
+    ctx.fillStyle = worldColor.bg;
+    ctx.fillRect(0, 0, visibleArea.width, visibleArea.height);
+  }
+
+  public drawEdge(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    visibleArea: VisibleArea
+  ) {
+    ctx.fillStyle = worldColor.edge;
+
+    // top edge
+    ctx.fillRect(
+      0,
+      0,
+      visibleArea.width,
+      Math.max(0, visibleArea.height - visibleArea.yEnd)
+    );
+
+    // left edge
+    ctx.fillRect(
+      0,
+      0,
+      Math.max(0, visibleArea.width - visibleArea.xEnd),
+      canvas.height
+    );
+
+    // bottom edge
+    const bottomEdgeHeight = Math.min(
+      visibleArea.height,
+      (visibleArea.yStart - this.height) * -1
+    );
+    ctx.fillRect(
+      0,
+      bottomEdgeHeight,
+      visibleArea.width,
+      visibleArea.height - bottomEdgeHeight
+    );
+
+    // right edge
+    const rightEdgeWidth = Math.min(
+      visibleArea.width,
+      (visibleArea.xStart - this.width) * -1
+    );
+    ctx.fillRect(
+      rightEdgeWidth,
+      0,
+      visibleArea.width - rightEdgeWidth,
+      visibleArea.height
+    );
   }
 }

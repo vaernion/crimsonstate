@@ -1,45 +1,36 @@
-import { canvasHeightFraction, canvasWidthFraction } from ".";
+import { constants } from "./constants";
 import { Controls } from "./controls";
 import { Debug } from "./debug";
+import { HUD } from "./hud";
 import { Menu } from "./menu";
 import { Player } from "./player";
-import { hudColor, playerColor, worldColor } from "./style";
 import { World } from "./world";
 
-export interface GameFrames {
-  count: number;
-  lastTimestamp: number;
-  dt: number;
-  referenceRefresh: number;
+export class GameState {
+  public paused: boolean = true;
+  public hasStarted: boolean = false;
+  public timeSpeed: number = 2.0;
 }
-export interface GameState {
-  paused: boolean;
-  hasStarted: boolean;
-  timeSpeed: number;
+export class GameFrames {
+  public count: number = 0;
+  public lastTimestamp: DOMHighResTimeStamp = 0;
+  public dt: number = 0; // ms
+  public referenceRefresh: number = 1000 / 60; // 16.67ms 60fps
 }
 
 export class Game {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
 
-  private debug = new Debug();
+  private debug: Debug = new Debug();
+  private state: GameState = new GameState();
+  private frames: GameFrames = new GameFrames();
 
   private menu: Menu = new Menu();
+  private hud: HUD = new HUD();
   private controls: Controls = new Controls(document);
   private world: World;
   private player: Player;
-
-  private state: GameState = {
-    paused: true,
-    hasStarted: false,
-    timeSpeed: 2.0, // for slow motion & configurable game speed
-  };
-  private frames: GameFrames = {
-    count: 0,
-    lastTimestamp: 0,
-    dt: 0,
-    referenceRefresh: 1000 / 60,
-  };
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -66,6 +57,11 @@ export class Game {
   }
 
   restart() {
+    this.debug = new Debug();
+    this.state = new GameState();
+    this.frames = new GameFrames();
+    this.menu = new Menu();
+    this.hud = new HUD();
     this.controls = new Controls(document);
     this.world = new World(this.world.width, this.world.height);
     this.player = new Player(this.world);
@@ -81,21 +77,21 @@ export class Game {
       this.canvas,
       this.frames,
       this.state,
-      this.controls,
       this.menu,
-      this.player,
+      this.controls,
       this.world,
-      this.restart.bind(this)
+      this.player
     );
     this.draw(
       this.canvas,
       this.ctx,
       this.debug,
       this.state,
-      this.controls,
       this.menu,
-      this.player,
-      this.world
+      this.hud,
+      this.controls,
+      this.world,
+      this.player
     );
     requestAnimationFrame(this.loop.bind(this));
   }
@@ -105,11 +101,10 @@ export class Game {
     canvas: HTMLCanvasElement,
     frames: GameFrames,
     state: GameState,
-    controls: Controls,
     menu: Menu,
-    player: Player,
+    controls: Controls,
     world: World,
-    restart: () => void
+    player: Player
   ): void {
     // skip certain frames mod 10 for delta time testing
     // if ([0, 1, 3, 5, 6, 7].includes(this.frames.count % 10)) {
@@ -118,7 +113,7 @@ export class Game {
     // }
 
     if (controls.isRestarting) {
-      restart();
+      return this.restart();
     }
 
     if (controls.isSpeeding) {
@@ -126,12 +121,14 @@ export class Game {
       controls.isSpeeding = false;
     }
 
+    // pause or exit menu depending on context
     if (controls.isEscaping) {
       // open pause menu
       if (state.hasStarted && !state.paused) {
         state.paused = true;
         menu.isShowingMenu = true;
         controls.isActivatingAbility = false;
+        // navigate menu
       } else if (state.paused && menu.isShowingMenu) {
         // go back one step here, add condition in previous block
         controls.isEscaping = false;
@@ -151,15 +148,21 @@ export class Game {
       return;
     }
 
-    // delta time
+    // update delta time
     frames.dt = (timestamp - frames.lastTimestamp) * state.timeSpeed;
 
     // player movement
-    player.move(controls, world, frames);
+    player.update(controls, world, frames);
 
     // other entitites movement
+    // for (const entity in staticEntities) {}
+    // for (const entity in movingEntitites) {}
 
     // calculate damage
+    // player.calculateDamage() ?
+    // for (const projectile in projectiles) {}
+    // for (const entity in staticEntities) {}
+    // for (const entity in movingEntitites) {}
 
     frames.lastTimestamp = timestamp;
     frames.count++;
@@ -170,14 +173,15 @@ export class Game {
     ctx: CanvasRenderingContext2D,
     debug: Debug,
     state: GameState,
-    controls: Controls,
     menu: Menu,
-    player: Player,
-    world: World
+    hud: HUD,
+    controls: Controls,
+    world: World,
+    player: Player
   ): void {
-    // dynamic resize
-    canvas.width = window.innerWidth * canvasWidthFraction;
-    canvas.height = window.innerHeight * canvasHeightFraction;
+    // dynamic canvas resize
+    canvas.width = window.innerWidth * constants.canvasWidthFraction;
+    canvas.height = window.innerHeight * constants.canvasHeightFraction;
 
     // menu screen
     if (menu.isShowingMenu) {
@@ -188,105 +192,25 @@ export class Game {
       return;
     }
 
-    // canvas x600y400
-    // world 1000x1000
-    // player x500 y500 (center)
-    // top left - x: 500 - canvas.x/2 == 200, y: 500 - canvas.y/2 == 300
-    // bottom right: x: 500 + canvas.x/2 = 800, y: 500 + canvas.y/2 = 700
-    // desired visible area: x200y300 to x800y700
-
     // used for centering camera on player
     const visibleArea = world.visibleArea(canvas, player);
 
-    // background
-    ctx.fillStyle = worldColor.bg;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // world edge
-    ctx.fillStyle = worldColor.edge;
-
-    // top edge
-    ctx.fillRect(
-      0,
-      0,
-      visibleArea.width,
-      Math.max(0, visibleArea.height - visibleArea.yEnd)
-    );
-
-    // left edge
-    ctx.fillRect(
-      0,
-      0,
-      Math.max(0, visibleArea.width - visibleArea.xEnd),
-      canvas.height
-    );
-
-    // bottom edge
-    const bottomEdgeHeight = Math.min(
-      visibleArea.height,
-      (visibleArea.yStart - world.height) * -1
-    );
-    ctx.fillRect(
-      0,
-      bottomEdgeHeight,
-      visibleArea.width,
-      visibleArea.height - bottomEdgeHeight
-    );
-
-    // right edge
-    const rightEdgeWidth = Math.min(
-      visibleArea.width,
-      (visibleArea.xStart - world.width) * -1
-    );
-    ctx.fillRect(
-      rightEdgeWidth,
-      0,
-      visibleArea.width - rightEdgeWidth,
-      visibleArea.height
-    );
+    // world background and edge
+    world.draw(canvas, ctx, visibleArea);
 
     // debug info
     if (controls.showDebug) {
       debug.drawDebug(canvas, ctx, state, controls, player, world);
     }
 
-    // player
-    ctx.fillStyle = playerColor.fill;
-    ctx.fillRect(
-      // divide by 2 to keep x and y in center of player sprite
-      canvas.width / 2 - player.width / 2,
-      canvas.height / 2 - player.height / 2,
-      player.width,
-      player.height
-    );
+    // static entitities
 
-    // player outline
-    ctx.beginPath();
-    ctx.strokeStyle = playerColor.outline;
-    ctx.arc(
-      canvas.width / 2,
-      canvas.height / 2,
-      player.width / 2,
-      0,
-      2 * Math.PI
-    );
-    ctx.stroke();
+    // moving entitites
+
+    // player
+    player.draw(canvas, ctx);
 
     // HUD
-    // health (display around player?)
-    ctx.fillStyle = hudColor.health;
-    ctx.fillRect(
-      canvas.width * 0.03,
-      canvas.height * 0.03,
-      canvas.width * 0.03,
-      canvas.width * 0.03
-    );
-    ctx.fillText(
-      player.health.toFixed(0),
-      canvas.width * 0.03,
-      canvas.height * 0.03 + canvas.width * 0.05
-    );
-    // weapon
-    //ability?
+    hud.draw(canvas, ctx, player);
   }
 }
