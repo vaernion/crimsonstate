@@ -19,18 +19,20 @@ export const menuColor = {
   buttonText: "black",
 };
 
+export const hudColor = {
+  health: "red",
+  pauseBox: "darkgrey",
+  pauseText: "purple",
+};
+export const worldColor = {
+  bg: "teal",
+  edge: "grey",
+};
 export const playerColor = {
   fill: "yellow",
   outline: "red",
 };
 
-export const worldColor = {
-  bg: "teal",
-  edge: "grey",
-};
-
-export const hudColor = {
-  health: "red",
-  pauseBox: "darkgrey",
-  pauseText: "purple",
+export const enemyColor = {
+  fill: "purple",
 };

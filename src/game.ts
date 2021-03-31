@@ -41,7 +41,7 @@ export class Game {
     worldHeight: number
   ) {
     this.world = new World(worldWidth, worldHeight);
-    this.player = new Player(this.world);
+    this.player = new Player(this.world, constants.player.health);
     this.canvas = canvas;
     const ctx = canvas.getContext("2d");
     if (ctx) {
@@ -73,7 +73,7 @@ export class Game {
     this.hud = new HUD();
     this.controls = new Controls(document);
     this.world = new World(this.world.width, this.world.height);
-    this.player = new Player(this.world);
+    this.player = new Player(this.world, constants.player.health);
   }
 
   public initLoop() {
@@ -261,7 +261,6 @@ export class Game {
         state.paused = true;
         menu.isShowingMenu = true;
         controls.specialKeyBuffer = "";
-        // menu.update(controls, timestamp, state);
         // close level up & resume
       } else if (false) {
         // state.paused = false

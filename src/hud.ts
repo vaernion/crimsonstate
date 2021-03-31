@@ -18,7 +18,7 @@ export class HUD {
       canvas.width * 0.03
     );
     ctx.fillText(
-      player.health.toFixed(0),
+      `${player.health.toFixed(0)} / ${player.maxHealth.toFixed(0)}`,
       canvas.width * 0.03,
       canvas.height * 0.03 + canvas.width * 0.05
     );
@@ -30,7 +30,12 @@ export class HUD {
     // PAUSED
     if (state.paused) {
       ctx.fillStyle = hudColor.pauseBox;
-      ctx.fillRect(canvas.width * 0.5, canvas.height * 0.2, 100, 200);
+      ctx.fillRect(
+        canvas.width * 0.5,
+        canvas.height * 0.2,
+        canvas.width * 0.2,
+        canvas.height * 0.1
+      );
       ctx.fillStyle = hudColor.pauseText;
       ctx.fillText("PAUSED", canvas.width * 0.5, canvas.height * 0.2);
     }

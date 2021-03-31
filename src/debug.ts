@@ -27,7 +27,7 @@ export class Debug {
     }${controls.isMovingRight ? "d" : ""}
     $state ${state.hasStarted ? "started" : ""} ${state.paused ? "paused" : ""}
     $frame ${frames.count}
-    $player ${controls.specialKeyBuffer === ControlsKeys.esc ? "+ESC" : ""}
+    $player speed:${player.speed().toFixed(2)}
     ❤️${player.health.toFixed(0)} h${player.height}w${player.width} ${
       controls.specialKeyBuffer === ControlsKeys.space ? "💣" : ""
     }
