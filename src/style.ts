@@ -31,4 +31,6 @@ export const worldColor = {
 
 export const hudColor = {
   health: "red",
+  pauseBox: "darkgrey",
+  pauseText: "purple",
 };

@@ -1,5 +1,5 @@
 import { Controls, ControlsKeys } from "./controls";
-import { GameState } from "./game";
+import { GameFrames, GameState } from "./game";
 import { Player } from "./player";
 import { debugColor } from "./style";
 import { World } from "./world";
@@ -9,6 +9,7 @@ export class Debug {
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
     state: GameState,
+    frames: GameFrames,
     controls: Controls,
     player: Player,
     world: World
@@ -18,14 +19,21 @@ export class Debug {
     const visibleArea = world.visibleArea(canvas, player);
 
     const debugInfo = `
-    ${controls.specialKeyBuffer}
+    ${controls.specialKeyBuffer}${
+      controls.specialKeyBuffer === " " ? "space" : ""
+    }
+    ${controls.isMovingUp ? "w" : ""}${controls.isMovingLeft ? "a" : ""}${
+      controls.isMovingDown ? "s" : ""
+    }${controls.isMovingRight ? "d" : ""}
     $state ${state.hasStarted ? "started" : ""} ${state.paused ? "paused" : ""}
+    $frame ${frames.count}
     $player ${controls.specialKeyBuffer === ControlsKeys.esc ? "+ESC" : ""}
     ❤️${player.health.toFixed(0)} h${player.height}w${player.width} ${
       controls.specialKeyBuffer === ControlsKeys.space ? "💣" : ""
     }
     x${player.position.x.toFixed(1)} y${player.position.y.toFixed(1)}
-    +x${player.velocity.x.toFixed(1)} +y${player.velocity.y.toFixed(1)}
+    vx${player.velocity.x.toFixed(1)} vy${player.velocity.y.toFixed(1)}
+    ax${player.acceleration.x.toFixed(1)} ay${player.acceleration.y.toFixed(1)}
     $world ⌛${state.timeSpeed}
     ${world.width}x${world.height}
     $camera

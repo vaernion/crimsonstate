@@ -34,12 +34,12 @@ export class Menu {
           : this.menuItems.length - 1;
     }
     // down
-    else if (controls.isMovingDown) {
+    if (controls.isMovingDown) {
       this.selectedItemIndex =
         (this.selectedItemIndex + 1) % this.menuItems.length;
     }
     // activate
-    else if (controls.specialKeyBuffer === ControlsKeys.space) {
+    if (controls.specialKeyBuffer === ControlsKeys.space) {
       this.menuItems[this.selectedItemIndex].onactivation();
     }
     // return from submenu or resume game
@@ -48,6 +48,7 @@ export class Menu {
       state.hasStarted
     ) {
       this.isShowingMenu = false;
+      state.paused = false;
     }
 
     controls.specialKeyBuffer = "";

@@ -9,10 +9,10 @@ import { World } from "./world";
 export class GameState {
   public paused: boolean = true;
   public hasStarted: boolean = false;
-  public timeSpeed: number = 2.0;
+  public timeSpeed: number = 1.0;
 }
 export class GameFrames {
-  public count: number = 0;
+  public count: number = 0; // total number
   public lastTimestamp: DOMHighResTimeStamp = 0;
   public dt: number = 0; // ms
   public referenceRefresh: number = 1000 / 60; // 16.67ms 60fps
@@ -21,6 +21,7 @@ export class GameFrames {
 export class Game {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
+  private animationFrameRequestId: number = 0;
 
   private debug: Debug = new Debug();
   private state: GameState = new GameState();
@@ -61,6 +62,7 @@ export class Game {
 
   pause() {
     this.state.paused = !this.state.paused;
+    this.controls.specialKeyBuffer = "";
   }
 
   restart() {
@@ -75,13 +77,18 @@ export class Game {
   }
 
   public initLoop() {
-    requestAnimationFrame(this.loop.bind(this));
+    this.animationFrameRequestId = requestAnimationFrame(this.loop.bind(this));
+  }
+
+  private cancelLoop() {
+    cancelAnimationFrame(this.animationFrameRequestId);
   }
 
   private loop(timestamp: DOMHighResTimeStamp): void {
+    // cancelAnimationFrame() does not work if request is at end
+    this.animationFrameRequestId = requestAnimationFrame(this.loop.bind(this));
     this.update(
       timestamp,
-      this.canvas,
       this.frames,
       this.state,
       this.menu,
@@ -94,18 +101,17 @@ export class Game {
       this.ctx,
       this.debug,
       this.state,
+      this.frames,
       this.menu,
       this.hud,
       this.controls,
       this.world,
       this.player
     );
-    requestAnimationFrame(this.loop.bind(this));
   }
 
   private update(
     timestamp: DOMHighResTimeStamp,
-    canvas: HTMLCanvasElement,
     frames: GameFrames,
     state: GameState,
     menu: Menu,
@@ -119,11 +125,114 @@ export class Game {
     //   return;
     // }
 
-    // restart
-    if (controls.specialKeyBuffer === ControlsKeys.v) {
-      return this.restart();
+    // update delta time each update
+    // syncs game time to actual time passed
+    // and ensures game doesn't skip time when unpausing
+    frames.dt = (timestamp - frames.lastTimestamp) * state.timeSpeed;
+    frames.lastTimestamp = timestamp;
+
+    // ---------- PAUSE ----------
+    if (controls.specialKeyBuffer === ControlsKeys.p && !menu.isShowingMenu) {
+      this.pause();
     }
 
+    // ---------- START ----------
+    else if (menu.isStartingGame) {
+      this.start();
+    }
+
+    // ---------- HANDLE SPECIALKEYBUFFER ----------
+    if (!menu.isShowingMenu) {
+      this.handleSpecialKeys(timestamp, state, menu, controls, player);
+    }
+    // ---------- HANDLE MENU ----------
+    else {
+      menu.update(controls, timestamp, state);
+      return; // prevents timing bugs caused if specialKeyBuffer is emptied
+    }
+
+    // ---------- PLAYING ----------
+    if (!state.paused) {
+      // player movement
+      player.update(controls, world, frames);
+
+      // other entitites movement or triggers
+      // for (const entity in staticEntities) {}
+      // for (const entity in movingEntitites) {}
+
+      // calculate ability
+
+      // calculate damage
+      // player.calculateDamage() ?
+      // for (const projectile in projectiles) {}
+      // for (const entity in staticEntities) {}
+      // for (const entity in movingEntitites) {}
+
+      frames.count++;
+    }
+
+    controls.specialKeyBuffer = "";
+  }
+
+  draw(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    debug: Debug,
+    state: GameState,
+    frames: GameFrames,
+    menu: Menu,
+    hud: HUD,
+    controls: Controls,
+    world: World,
+    player: Player
+  ): void {
+    // dynamic canvas resize
+    canvas.width = window.innerWidth * constants.canvasWidthFraction;
+    canvas.height = window.innerHeight * constants.canvasHeightFraction;
+
+    // menu screen
+    if (menu.isShowingMenu) {
+      menu.draw(canvas, ctx, state);
+      // show debug over menu
+      if (controls.showDebug) {
+        debug.drawDebug(canvas, ctx, state, frames, controls, player, world);
+      }
+      return;
+    }
+
+    // used for centering camera on player
+    const visibleArea = world.visibleArea(canvas, player);
+
+    // world background and edge
+    world.draw(canvas, ctx, visibleArea);
+
+    // debug info
+    if (controls.showDebug) {
+      debug.drawDebug(canvas, ctx, state, frames, controls, player, world);
+    }
+
+    // static entitities
+
+    // moving entitites
+
+    // player
+    player.draw(canvas, ctx);
+
+    // HUD
+    hud.draw(canvas, ctx, state, player);
+  }
+
+  private handleSpecialKeys(
+    timestamp: DOMHighResTimeStamp,
+    state: GameState,
+    menu: Menu,
+    controls: Controls,
+    player: Player
+  ) {
+    // console.log(controls.specialKeyBuffer);
+    if (controls.specialKeyBuffer === ControlsKeys.v) {
+      this.restart();
+    }
     // change speed (time factor)
     else if (controls.specialKeyBuffer === ControlsKeys.z) {
       state.timeSpeed = state.timeSpeed > 1 ? 1.0 : 3.0;
@@ -148,95 +257,21 @@ export class Game {
       !menu.isCoolingDown(timestamp)
     ) {
       // open menu & pause
-      if (state.hasStarted && !menu.isShowingMenu) {
+      if (state.hasStarted) {
         state.paused = true;
         menu.isShowingMenu = true;
         controls.specialKeyBuffer = "";
-        menu.update(controls, timestamp, state);
+        // menu.update(controls, timestamp, state);
         // close level up & resume
       } else if (false) {
         // state.paused = false
         // state.isShowingLevelUp = false
       }
     }
-    // start
-    else if (menu.isStartingGame) {
-      this.start();
-      return;
+    // cancel loop, for debugging
+    else if (controls.specialKeyBuffer === ControlsKeys.zero) {
+      this.cancelLoop();
     }
-    // menu navigation, check to ensure game wont run in background
-    else if (state.paused && menu.isShowingMenu) {
-      // console.count("men uupdate");
-      menu.update(controls, timestamp, state);
-      return;
-    }
-
-    // update delta time
-    frames.dt = (timestamp - frames.lastTimestamp) * state.timeSpeed;
-
-    // player movement
-    player.update(controls, world, frames);
-
-    // other entitites movement or triggers
-    // for (const entity in staticEntities) {}
-    // for (const entity in movingEntitites) {}
-
-    // calculate ability
-
-    // calculate damage
-    // player.calculateDamage() ?
-    // for (const projectile in projectiles) {}
-    // for (const entity in staticEntities) {}
-    // for (const entity in movingEntitites) {}
-
-    frames.lastTimestamp = timestamp;
-    frames.count++;
     controls.specialKeyBuffer = "";
-  }
-
-  draw(
-    canvas: HTMLCanvasElement,
-    ctx: CanvasRenderingContext2D,
-    debug: Debug,
-    state: GameState,
-    menu: Menu,
-    hud: HUD,
-    controls: Controls,
-    world: World,
-    player: Player
-  ): void {
-    // dynamic canvas resize
-    canvas.width = window.innerWidth * constants.canvasWidthFraction;
-    canvas.height = window.innerHeight * constants.canvasHeightFraction;
-
-    // menu screen
-    if (menu.isShowingMenu) {
-      menu.draw(canvas, ctx, state);
-      if (controls.showDebug) {
-        debug.drawDebug(canvas, ctx, state, controls, player, world);
-      }
-      return;
-    }
-
-    // used for centering camera on player
-    const visibleArea = world.visibleArea(canvas, player);
-
-    // world background and edge
-    world.draw(canvas, ctx, visibleArea);
-
-    // debug info
-    if (controls.showDebug) {
-      debug.drawDebug(canvas, ctx, state, controls, player, world);
-    }
-
-    // static entitities
-
-    // moving entitites
-
-    // player
-    player.draw(canvas, ctx);
-
-    // HUD
-    hud.draw(canvas, ctx, player);
   }
 }

@@ -1,5 +1,5 @@
 import { Controls } from "./controls";
-import { MovingEntity } from "./entity";
+import { MovingEntity, Vector } from "./entity";
 import { GameFrames } from "./game";
 import { playerColor } from "./style";
 import { World } from "./world";
@@ -14,7 +14,8 @@ export class Player extends MovingEntity {
     super();
     this.position.x = world.width / 2;
     this.position.y = world.height / 2;
-    this.movementSpeed = 15;
+    this.acceleration = new Vector(0.1, 0.1);
+    this.maxSpeed = 5;
   }
 
   public update(controls: Controls, world: World, frames: GameFrames) {
@@ -46,51 +47,65 @@ export class Player extends MovingEntity {
   }
 
   private move(controls: Controls, frames: GameFrames, world: World) {
-    // accelerate
-    this.calculateVelocity(controls, frames);
-    this.position.x += this.velocity.x;
-    this.position.y += this.velocity.y;
+    this.calculatePosition(controls, frames);
     this.fixEntityCollision();
     this.fixEdgeCollision(world);
   }
 
-  private calculateVelocity(controls: Controls, frames: GameFrames) {
-    const dtFactor = frames.dt / 1000;
-    const movement = { x: 0, y: 0 };
+  private calculatePosition(controls: Controls, frames: GameFrames) {
+    const dtFactor = frames.dt / frames.referenceRefresh;
+    const velocity = new Vector(this.velocity.x, this.velocity.y);
 
+    // accelerate
     if (controls.isMovingRight) {
-      movement.x += dtFactor;
+      velocity.x += this.acceleration.x;
     }
     if (controls.isMovingLeft) {
-      movement.x -= dtFactor;
+      velocity.x -= this.acceleration.x;
     }
     if (controls.isMovingUp) {
-      movement.y -= dtFactor;
+      velocity.y -= this.acceleration.y;
     }
     if (controls.isMovingDown) {
-      movement.y += dtFactor;
+      velocity.y += this.acceleration.y;
     }
 
-    // if (frames.count % 60 === 0) {
-    //   console.clear();
-    //   console.log("dt", frames.dt, "dtFactor", dtFactor);
-    //   console.log("controls", controls);
-    //   console.log("movRaw", movement);
+    // if (!controls.isMovingRight && !controls.isMovingLeft) {
+    //   velocity.x -= Math.abs(this.acceleration.x) * Number(velocity.x >= 0);
     // }
 
-    const magnitude = Math.sqrt(movement.x ** 2 + movement.y ** 2);
-    if (magnitude) movement.x /= magnitude;
-    if (magnitude) movement.y /= magnitude;
-    movement.x *= (this.movementSpeed * frames.dt) / frames.referenceRefresh;
-    movement.y *= (this.movementSpeed * frames.dt) / frames.referenceRefresh;
-
-    this.velocity.x = movement.x;
-    this.velocity.y = movement.y;
-
-    // if (frames.count % 60 === 0) {
-    //   // console.log("mag", magnitude);
-    //   console.log("movFixed", movement);
+    // if (!controls.isMovingDown && !controls.isMovingUp) {
+    //   velocity.y -= Math.abs(this.acceleration.y) * Number(velocity.y >= 0);
     // }
+
+    // console.log("velocity accelerated", velocity);
+
+    // restrict to max speed
+    if (velocity.x > this.maxSpeed) {
+      velocity.x = this.maxSpeed;
+    } else if (velocity.x < this.maxSpeed * -1) {
+      velocity.x = this.maxSpeed * -1;
+    }
+    if (velocity.y > this.maxSpeed) {
+      velocity.y = this.maxSpeed;
+    } else if (velocity.y < this.maxSpeed * -1) {
+      velocity.y = this.maxSpeed * -1;
+    }
+
+    // console.log("velocity limited", velocity);
+
+    const magnitude = Math.sqrt(velocity.x ** 2 + velocity.y ** 2);
+    // console.log("magnitude", magnitude);
+    if (magnitude) velocity.x /= magnitude;
+    if (magnitude) velocity.y /= magnitude;
+
+    this.velocity.x = velocity.x * dtFactor * this.maxSpeed;
+    this.velocity.y = velocity.y * dtFactor * this.maxSpeed;
+
+    // console.log("velocity final", this.velocity);
+
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
   }
 
   private fixEntityCollision() {}

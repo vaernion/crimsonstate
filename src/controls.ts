@@ -10,11 +10,13 @@ export enum ControlsKeys {
   h = "h", // help
   space = " ", // ability/select
   enter = "Enter", // alternative for space
-  esc = "Escape",
   // r = "r", // reload
+  esc = "Escape",
+  p = "p", // pause
   v = "v", // restart
   z = "z", // time skip
   pipe = "|", // show debug info
+  zero = "0", // cancel game loop
 }
 
 type SpecialKeyBuffer =
@@ -22,8 +24,10 @@ type SpecialKeyBuffer =
   | ControlsKeys.space
   | ControlsKeys.enter
   | ControlsKeys.esc
+  | ControlsKeys.p
   | ControlsKeys.v
-  | ControlsKeys.z;
+  | ControlsKeys.z
+  | ControlsKeys.zero;
 
 export class Controls {
   private document: Document;
@@ -34,13 +38,9 @@ export class Controls {
   public isMovingLeft: boolean = false;
   public isMovingRight: boolean = false;
   public isMovingDown: boolean = false;
+  // stores one upcoming non-movement key, easier than one boolean for each key
+  // can't pause and use ability and reload in the same frame
   public specialKeyBuffer: SpecialKeyBuffer = "";
-  // can't be canceled, set to false by game after activation finishes
-  // public isActivatingAbility: boolean = false;
-  // unpause, go back one step in menu etc.
-  // public isEscaping: boolean = false;
-  // public isRestarting: boolean = false;
-  // public isSpeeding: boolean = false;
 
   constructor(context: Document) {
     this.document = context;
@@ -52,29 +52,10 @@ export class Controls {
     // TS doesn't like Object.values(ControlsButtons).includes(ev.key)
     let validButtons: string[] = Object.values(ControlsKeys);
     if (validButtons.includes(ev.key)) {
-      // prevent accidental scrolling of the page
+      // prevent keys from interacting with browser (e.g. scroll down)
       ev.preventDefault();
     }
     switch (ev.key) {
-      case ControlsKeys.pipe:
-        if (ev.type === "keydown") this.showDebug = !this.showDebug;
-        break;
-      case ControlsKeys.h:
-        if (ev.type === "keydown") this.handleHelp();
-        break;
-      case ControlsKeys.esc:
-        if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.esc;
-        break;
-      case ControlsKeys.space:
-      case ControlsKeys.enter:
-        if (ev.type === "keydown") this.handleAbility();
-        break;
-      case ControlsKeys.v:
-        if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.v;
-        break;
-      case ControlsKeys.z:
-        if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.z;
-        break;
       case ControlsKeys.w:
       case ControlsKeys.a:
       case ControlsKeys.s:
@@ -85,14 +66,32 @@ export class Controls {
       case ControlsKeys.right:
         this.handleDirection(ev);
         break;
+      case ControlsKeys.h:
+        if (ev.type === "keydown") this.handleHelp();
+        break;
+      case ControlsKeys.esc:
+        if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.esc;
+        break;
+      case ControlsKeys.space:
+      case ControlsKeys.enter:
+        if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.space;
+        break;
+      case ControlsKeys.p:
+        if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.p;
+        break;
+      case ControlsKeys.v:
+        if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.v;
+        break;
+      case ControlsKeys.z:
+        if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.z;
+        break;
+      case ControlsKeys.pipe:
+        if (ev.type === "keydown") this.showDebug = !this.showDebug;
+        break;
+      case ControlsKeys.zero:
+        if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.zero;
+        break;
     }
-  }
-
-  private handleHelp() {
-    const helpClue = this.document.getElementById("help-clue");
-    const helpContent = this.document.getElementById("help-content");
-    if (helpClue) helpClue.hidden = !helpClue.hidden;
-    if (helpContent) helpContent.hidden = !helpContent.hidden;
   }
 
   private handleDirection(ev: KeyboardEvent) {
@@ -116,7 +115,10 @@ export class Controls {
     }
   }
 
-  private handleAbility() {
-    this.specialKeyBuffer = ControlsKeys.space;
+  private handleHelp() {
+    const helpClue = this.document.getElementById("help-clue");
+    const helpContent = this.document.getElementById("help-content");
+    if (helpClue) helpClue.hidden = !helpClue.hidden;
+    if (helpContent) helpContent.hidden = !helpContent.hidden;
   }
 }
