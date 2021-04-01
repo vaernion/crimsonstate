@@ -39,8 +39,8 @@ export interface EnemyType {
 export const enemyTypes: { [k: string]: EnemyType } = {
   normal: {
     type: "normal",
-    acceleration: 1,
-    maxSpeed: 10,
+    acceleration: 0.8,
+    maxSpeed: 9,
     width: 20,
     height: 20,
     health: 50,
@@ -49,8 +49,8 @@ export const enemyTypes: { [k: string]: EnemyType } = {
   },
   fast: {
     type: "fast",
-    acceleration: 1.4,
-    maxSpeed: 13,
+    acceleration: 1.2,
+    maxSpeed: 11,
     width: 10,
     height: 10,
     health: 30,
@@ -59,8 +59,8 @@ export const enemyTypes: { [k: string]: EnemyType } = {
   },
   slow: {
     type: "slow",
-    acceleration: 0.3,
-    maxSpeed: 8,
+    acceleration: 0.25,
+    maxSpeed: 7,
     width: 30,
     height: 30,
     health: 200,

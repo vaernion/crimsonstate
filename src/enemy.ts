@@ -13,6 +13,7 @@ export class Enemy extends MovingEntity {
       enemyType.acceleration,
       enemyType.acceleration
     );
+    this.maxSpeed = enemyType.maxSpeed;
     this.width = enemyType.width;
     this.height = enemyType.height;
     this.health = enemyType.health;

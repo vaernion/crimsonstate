@@ -76,7 +76,6 @@ export class Game {
     this.frames = new GameFrames();
     this.menu = new Menu();
     this.hud = new HUD();
-    this.controls = new Controls(document);
     this.world = new World(this.world.width, this.world.height);
     this.player = new Player(this.world, constants.player.health);
     this.enemies = new Set();
