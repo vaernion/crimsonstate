@@ -169,7 +169,7 @@ export class Game {
     // ---------- PLAYING ----------
     if (!state.paused) {
       // player movement
-      player.update(controls, world, frames);
+      player.update(controls, frames, world);
 
       spawner.generate(frames, visibleArea, world, enemies);
 
@@ -177,7 +177,7 @@ export class Game {
       // for (const entity in staticEntities) {}
       // for (const entity in movingEntitites) {}
       enemies.forEach((enemy) => {
-        enemy.update(controls, world, frames);
+        enemy.update(controls, frames, world, player);
       });
 
       // calculate ability

@@ -23,7 +23,7 @@ export class Player extends MovingEntity {
     this.height = constants.player.height;
   }
 
-  public update(controls: Controls, world: World, frames: GameFrames) {
+  public update(controls: Controls, frames: GameFrames, world: World) {
     this.move(controls, frames, world);
     // PLACEHOLDER: shoot and stuff
   }

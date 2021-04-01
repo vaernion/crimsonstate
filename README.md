@@ -19,7 +19,7 @@ TypeScript, Canvas
 
 ### Partial TODO
 
-asap: enemies, projectiles, damage model, weapon
+asap: enemies, entity collision detection, projectiles, damage model, weapon
 
 then: static entities (terrain, water, plants, hazards, fire, traps), aoe damage?
 
@@ -45,7 +45,7 @@ consider: sprites, art library
 | Game/Save            | settings/score/unlocks?    | localstate JSON                                 |                    |
 | Entity Spawner       | generate enemies over time | randomly placed inside world for now            | :heavy_check_mark: |
 | Enemy/Entity         | spawn outside vision       | depends on camera (canvas) size                 | :heavy_check_mark: |
-| Enemy/Entity         | move towards player        |                                                 |                    |
+| Enemy/Entity         | move towards player        |                                                 | :heavy_check_mark: |
 | Player Enemy         | take damage                |                                                 |                    |
 | Game/other??         | win/lose conditions        | lose: death                                     |                    |
 | Player               | use ability                | screen (visible enemies) wipe?                  |                    |

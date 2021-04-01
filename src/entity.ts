@@ -47,6 +47,16 @@ export class Entity {
     );
   }
 
+  public update(
+    controls: Controls,
+    frames: GameFrames,
+    world: World,
+    player: Player
+  ) {
+    // damage nearby stuff if hazard
+    // destroy self if certain conditions met (timer?)
+  }
+
   public draw(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
@@ -84,13 +94,23 @@ export class MovingEntity extends Entity {
     return Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
   }
 
-  public update(controls: Controls, world: World, frames: GameFrames) {
-    this.move(controls, frames, world);
+  public update(
+    controls: Controls,
+    frames: GameFrames,
+    world: World,
+    player: Player
+  ) {
+    this.move(controls, frames, world, player);
     // PLACEHOLDER: interact with other objects
   }
 
-  public move(controls: Controls, frames: GameFrames, world: World) {
-    const direction = new Vector(); // PLACEHOLDER - should target player
+  public move(
+    controls: Controls,
+    frames: GameFrames,
+    world: World,
+    player: Player
+  ) {
+    const direction = Vector.directionToTarget(this.position, player.position);
     this.calculatePosition(direction, frames);
     this.fixEntityCollision();
     this.fixEdgeCollision(world);
