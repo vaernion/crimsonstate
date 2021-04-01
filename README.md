@@ -9,7 +9,8 @@
 - Top-down 2d, standard keyboard & mouse controls.
 - Enemies assault player from all sides, movement and kiting important.
 - Pick up weapons, abilities & power-ups.
-- Upgrades & unlocks?
+- Level up and select upgrades & stats.
+- Per-profile unlocks & stats - saved to localstate and/or DB.
 
 ## Code
 
@@ -35,39 +36,39 @@ consider: sprites, art library
 | Player               | entity collision           |                                                 |                    |
 | World                | world constructor          | only determines max area for now                | :heavy_check_mark: |
 | Game                 | world edge                 | draw & collision                                | :heavy_check_mark: |
-| Menu Controls        | pause game                 | conditional update in Game                      | :heavy_check_mark: |
+| Game Menu Controls   | pause game                 | conditional update in Game                      | :heavy_check_mark: |
 | Menu Controls        | select options             | wasd and/or mouse                               | :heavy_check_mark: |
 | Game Menu Controls   | start/reset                | hotkey too?                                     | :heavy_check_mark: |
 | Game Player          | camera follows player      |                                                 | :heavy_check_mark: |
 | HUD                  | hud draw method            | extract from Game                               | :heavy_check_mark: |
 | Entity               | movement v2                | direction & acceleration -> velocity            | :heavy_check_mark: |
 | Entity               | friction/drag/deceleration |                                                 | :heavy_check_mark: |
-| Game/Save            | settings/score/unlocks?    | localstate JSON                                 |                    |
+| Game/Save            | settings/score/unlocks?    | localStorage JSON                               |                    |
 | Entity Spawner       | generate enemies over time | randomly placed inside world for now            | :heavy_check_mark: |
-| Enemy/Entity         | spawn outside vision       | depends on camera (canvas) size                 | :heavy_check_mark: |
-| Enemy/Entity         | move towards player        |                                                 | :heavy_check_mark: |
-| Player Enemy         | take damage                |                                                 |                    |
-| Game/other??         | win/lose conditions        | lose: death                                     |                    |
+| Entity               | spawn outside vision       | depends on camera (canvas) size                 | :heavy_check_mark: |
+| MovingEntity         | move towards player        |                                                 | :heavy_check_mark: |
+| Entity               | take damage & destruction  | enemies.delete(this) should work                |                    |
+| Game Player          | win/lose conditions        | lose: death, win: score/kills/time              |                    |
 | Player               | use ability                | screen (visible enemies) wipe?                  |                    |
-| Weapon               | spawn in world             |                                                 |                    |
-| Player               | pick up weapon             |                                                 |                    |
+| Game Weapon          | spawn in world             |                                                 |                    |
 | Controls Player?     | mouse aim                  | only when mouse inside canvas or not?           |                    |
-| Weapon               | attach to player           |                                                 |                    |
-| Projectile           | move & collide             | overload entity calculatevector (no friction)   |                    |
-| Enemy/Entity         | ranged/melee attacks       | vector enemy -> player                          |                    |
-| Weapon               | fire projectile            | vector player -> aim direction                  |                    |
+| Player Weapon HUD    | pick up weapon             | on collision? attached? visuals? HUD?           |                    |
+| Entity Projectile    | move & collide             | overload entity calculatevector (no friction)   |                    |
+| Entity Enemy         | ranged/melee attacks       | vector enemy -> player                          |                    |
+| Weapon Controls      | fire projectile            | mouse1, vector player -> aim direction          |                    |
 | World Player Entity  | powerups                   | activated on collision,various effects          |                    |
 | Player Game Controls | upgrades                   | xp, pause and select stat++ and/or ability      |                    |
-| World                | hazards                    | fire/lightning etc, damage based on delta time  |                    |
 | World                | static entities (terrain)  | with collision                                  |                    |
+| World                | hazards                    | fire/lightning etc, damage based on delta time  |                    |
 | World                | varying visuals            | random gradients at first for some variance     |                    |
-| World                | area cells                 | 3x3 or 5x5 matrix, player always in center      |                    |
-| World                | procedural generation      | seeded world, find algorithm                    |                    |
-| World                | infinite area              | generate cells around player (outside vision)   |                    |
 | Graphics             | sprites/pixel art          | find free stuff with consistent theme           |                    |
+| Graphics/Particles   | blood, explosions etc.     | visual effect only, despawn after X time?       |                    |
+| World                | procedural generation      | seeded world, find algorithm                    |                    |
+| World                | area cells                 | 3x3 or 5x5 matrix, player always in center      |                    |
+| World                | infinite area              | generate cells around player (outside vision)   |                    |
 | Sound                | sound effects              | find free library with good sound design        |                    |
 | Sound                | music                      | freely licensed doom/metal-ish                  |                    |
-| Save (optional)      | auth and/or database       | Netlify serverless/AWS lambda & MongoDB Atlas   |                    |
+| Save                 | auth and/or database       | Netlify serverless/AWS lambda & MongoDB Atlas   |                    |
 | _code_               | tests                      | Jest                                            |                    |
 | _code_               | CI/CD                      | Netlify?                                        |                    |
 | _content_            | more variety               | more enemies, weapons, upgrades, worlds(?) etc. |                    |
