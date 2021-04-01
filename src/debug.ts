@@ -7,7 +7,7 @@ import { World } from "./world";
 
 export class Debug {
   public showTimestamps: boolean = true;
-  public drawDebug(
+  public draw(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
     state: GameState,

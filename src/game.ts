@@ -58,19 +58,19 @@ export class Game {
     canvas.height = canvasHeight;
   }
 
-  start() {
+  private start() {
     this.state.hasStarted = true;
     this.state.paused = false;
     this.menu.isStartingGame = false;
     this.menu.isShowingMenu = false;
   }
 
-  pause() {
+  private pause() {
     this.state.paused = !this.state.paused;
     this.controls.specialKeyBuffer = "";
   }
 
-  restart() {
+  private restart() {
     this.debug = new Debug();
     this.state = new GameState();
     this.frames = new GameFrames();
@@ -193,7 +193,7 @@ export class Game {
     controls.specialKeyBuffer = "";
   }
 
-  draw(
+  private draw(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
     debug: Debug,
@@ -215,7 +215,7 @@ export class Game {
       menu.draw(canvas, ctx, state);
       // show debug over menu
       if (controls.showDebug) {
-        debug.drawDebug(
+        debug.draw(
           canvas,
           ctx,
           state,
@@ -259,16 +259,7 @@ export class Game {
 
     // debug info on top
     if (controls.showDebug) {
-      debug.drawDebug(
-        canvas,
-        ctx,
-        state,
-        frames,
-        controls,
-        world,
-        player,
-        enemies
-      );
+      debug.draw(canvas, ctx, state, frames, controls, world, player, enemies);
     }
   }
 
