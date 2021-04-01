@@ -78,6 +78,7 @@ export class Game {
     this.hud = new HUD();
     this.world = new World(this.world.width, this.world.height);
     this.player = new Player(this.world, constants.player.health);
+    this.spawner = new Spawner();
     this.enemies = new Set();
   }
 
