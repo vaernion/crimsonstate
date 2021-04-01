@@ -16,6 +16,7 @@ export class World {
 
   constructor(width: number, height: number) {
     (this.width = width), (this.height = height);
+    this.generateWorld();
   }
 
   public visibleArea(canvas: HTMLCanvasElement, player: Player): VisibleArea {
@@ -38,7 +39,7 @@ export class World {
     this.drawEdge(canvas, ctx, visibleArea);
   }
 
-  public drawBackground(
+  private drawBackground(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
     visibleArea: VisibleArea
@@ -47,7 +48,7 @@ export class World {
     ctx.fillRect(0, 0, visibleArea.width, visibleArea.height);
   }
 
-  public drawEdge(
+  private drawEdge(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
     visibleArea: VisibleArea
@@ -93,5 +94,9 @@ export class World {
       visibleArea.width - rightEdgeWidth,
       visibleArea.height
     );
+  }
+
+  private generateWorld() {
+    // PLACEHOLDER: generate random terrain and static objects
   }
 }

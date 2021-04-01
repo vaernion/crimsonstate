@@ -64,13 +64,6 @@ export class Entity {
     player: Player
   ) {
     ctx.fillStyle = entityColor.default;
-    // PLACEHOLDER: draw position relative to visible area (if visible)
-
-    // enemy actual x300y200 visiblearea x200y100 to x700y300 canvas x500y200
-    // actual-visiblestart == x100y100
-    // enemy actual x0y0 visiblearea x-200y-100 to x300y200 canvas x500y300
-    // should be at canvas x200y100
-    // actual-visiblestart == x0y0 - x(-200)y(-200) = x-200y-200
 
     const visibleArea = world.visibleArea(canvas, player);
     if (this.isVisible(visibleArea)) {
