@@ -6,14 +6,17 @@ import { playerColor } from "./style";
 import { World } from "./world";
 
 export class Player extends MovingEntity {
-  private headSize = 15;
+  private headSize = constants.player.headSize; // placeholder until proper images
 
   constructor(world: World, health: number) {
     super();
     this.position.x = world.width / 2;
     this.position.y = world.height / 2;
-    this.acceleration = new Vector(1.3, 1.3);
-    this.maxSpeed = 5;
+    this.acceleration = new Vector(
+      constants.player.acceleration.x,
+      constants.player.acceleration.y
+    );
+    this.maxSpeed = constants.player.maxSpeed;
     this.health = health;
     this.maxHealth = health;
     this.width = constants.player.width;
@@ -71,7 +74,7 @@ export class Player extends MovingEntity {
     if (controls.isMovingDown) {
       direction.y += 1;
     }
-    direction = this.normalizeVectorMagnitude(direction);
+    direction.normalize();
     return direction;
   }
 

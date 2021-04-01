@@ -1,6 +1,6 @@
 import { Controls, ControlsKeys } from "./controls";
 import { GameState } from "./game";
-import { colors, menuColor } from "./style";
+import { menuColor, themeColor } from "./style";
 
 export class Menu {
   public isShowingMenu: boolean = true;
@@ -94,7 +94,7 @@ export class Menu {
     });
 
     // crimsonstate art/image here later instead of rectangle
-    ctx.fillStyle = colors.c4;
+    ctx.fillStyle = themeColor.c4;
     ctx.fillRect(
       canvas.width * 0.6,
       canvas.height * 0.5,

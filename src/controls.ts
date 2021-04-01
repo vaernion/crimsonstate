@@ -14,9 +14,10 @@ export enum ControlsKeys {
   esc = "Escape",
   p = "p", // pause
   v = "v", // restart
-  z = "z", // time skip
+  z = "z", // time speed
   pipe = "|", // show debug info
   zero = "0", // cancel game loop
+  one = "1", // show enemies
 }
 
 type SpecialKeyBuffer =
@@ -27,7 +28,8 @@ type SpecialKeyBuffer =
   | ControlsKeys.p
   | ControlsKeys.v
   | ControlsKeys.z
-  | ControlsKeys.zero;
+  | ControlsKeys.zero
+  | ControlsKeys.one;
 
 export class Controls {
   private document: Document;
@@ -90,6 +92,9 @@ export class Controls {
         break;
       case ControlsKeys.zero:
         if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.zero;
+        break;
+      case ControlsKeys.one:
+        if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.one;
         break;
     }
   }

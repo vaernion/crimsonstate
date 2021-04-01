@@ -1,9 +1,11 @@
 import { constants } from "./constants";
 import { Controls, ControlsKeys } from "./controls";
 import { Debug } from "./debug";
+import { Enemy } from "./enemy";
 import { HUD } from "./hud";
 import { Menu } from "./menu";
 import { Player } from "./player";
+import { Spawner } from "./spawner";
 import { World } from "./world";
 
 export class GameState {
@@ -13,7 +15,8 @@ export class GameState {
 }
 export class GameFrames {
   public count: number = 0; // total number
-  public lastTimestamp: DOMHighResTimeStamp = 0;
+  public realTimestamp: DOMHighResTimeStamp = 0; // real world
+  public gameTimestamp: number = 0; // ingame time
   public dt: number = 0; // ms
   public referenceRefresh: number = 1000 / 60; // 16.67ms 60fps
 }
@@ -32,6 +35,8 @@ export class Game {
   private controls: Controls = new Controls(document);
   private world: World;
   private player: Player;
+  private spawner: Spawner = new Spawner();
+  private enemies: Set<Enemy> = new Set();
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -74,6 +79,7 @@ export class Game {
     this.controls = new Controls(document);
     this.world = new World(this.world.width, this.world.height);
     this.player = new Player(this.world, constants.player.health);
+    this.enemies = new Set();
   }
 
   public initLoop() {
@@ -94,7 +100,9 @@ export class Game {
       this.menu,
       this.controls,
       this.world,
-      this.player
+      this.player,
+      this.spawner,
+      this.enemies
     );
     this.draw(
       this.canvas,
@@ -106,7 +114,8 @@ export class Game {
       this.hud,
       this.controls,
       this.world,
-      this.player
+      this.player,
+      this.enemies
     );
   }
 
@@ -117,7 +126,9 @@ export class Game {
     menu: Menu,
     controls: Controls,
     world: World,
-    player: Player
+    player: Player,
+    spawner: Spawner,
+    enemies: Set<Enemy>
   ): void {
     // skip certain frames mod 10 for delta time testing
     // if ([0, 1, 3, 5, 6, 7].includes(this.frames.count % 10)) {
@@ -128,8 +139,12 @@ export class Game {
     // update delta time each update
     // syncs game time to actual time passed
     // and ensures game doesn't skip time when unpausing
-    frames.dt = (timestamp - frames.lastTimestamp) * state.timeSpeed;
-    frames.lastTimestamp = timestamp;
+    frames.dt = (timestamp - frames.realTimestamp) * state.timeSpeed;
+    frames.gameTimestamp +=
+      (timestamp - frames.realTimestamp) * state.timeSpeed;
+    frames.realTimestamp = timestamp;
+
+    const visibleArea = world.visibleArea(this.canvas, player);
 
     // ---------- PAUSE ----------
     if (controls.specialKeyBuffer === ControlsKeys.p && !menu.isShowingMenu) {
@@ -156,9 +171,12 @@ export class Game {
       // player movement
       player.update(controls, world, frames);
 
+      spawner.generate(frames, visibleArea, world, enemies);
+
       // other entitites movement or triggers
       // for (const entity in staticEntities) {}
       // for (const entity in movingEntitites) {}
+      enemies.forEach((enemy) => enemy.update(controls, world, frames));
 
       // calculate ability
 
@@ -184,7 +202,8 @@ export class Game {
     hud: HUD,
     controls: Controls,
     world: World,
-    player: Player
+    player: Player,
+    enemies: Set<Enemy>
   ): void {
     // dynamic canvas resize
     canvas.width = window.innerWidth * constants.canvasWidthFraction;
@@ -195,7 +214,16 @@ export class Game {
       menu.draw(canvas, ctx, state);
       // show debug over menu
       if (controls.showDebug) {
-        debug.drawDebug(canvas, ctx, state, frames, controls, player, world);
+        debug.drawDebug(
+          canvas,
+          ctx,
+          state,
+          frames,
+          controls,
+          world,
+          player,
+          enemies
+        );
       }
       return;
     }
@@ -208,12 +236,33 @@ export class Game {
 
     // debug info
     if (controls.showDebug) {
-      debug.drawDebug(canvas, ctx, state, frames, controls, player, world);
+      debug.drawDebug(
+        canvas,
+        ctx,
+        state,
+        frames,
+        controls,
+        world,
+        player,
+        enemies
+      );
     }
 
     // static entitities
 
     // moving entitites
+
+    // let i = 0;
+    enemies.forEach((enemy) => {
+      enemy.draw(canvas, ctx, world, player);
+      // if (enemy.isVisible(visibleArea)) {
+      //   i++;
+      // }
+    });
+    // console.log("visible:", i);
+
+    // console.log(enemies);
+    // cancelAnimationFrame(this.animationFrameRequestId);
 
     // player
     player.draw(canvas, ctx);
@@ -270,6 +319,13 @@ export class Game {
     // cancel loop, for debugging
     else if (controls.specialKeyBuffer === ControlsKeys.zero) {
       this.cancelLoop();
+      console.log("world", this.world);
+      console.log("player", this.player);
+      console.log("enemies", this.enemies);
+    }
+    // show enemies, for debugging
+    else if (controls.specialKeyBuffer === ControlsKeys.one) {
+      console.log(this.enemies);
     }
     controls.specialKeyBuffer = "";
   }

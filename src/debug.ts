@@ -1,4 +1,5 @@
 import { Controls, ControlsKeys } from "./controls";
+import { Enemy } from "./enemy";
 import { GameFrames, GameState } from "./game";
 import { Player } from "./player";
 import { debugColor } from "./style";
@@ -11,13 +12,15 @@ export class Debug {
     state: GameState,
     frames: GameFrames,
     controls: Controls,
+    world: World,
     player: Player,
-    world: World
+    enemies: Set<Enemy>
   ) {
     ctx.save();
 
     const visibleArea = world.visibleArea(canvas, player);
 
+    // this unreadable mess is shown as debuginfo by Game.draw()
     const debugInfo = `
     ${controls.specialKeyBuffer}${
       controls.specialKeyBuffer === " " ? "space" : ""
@@ -40,6 +43,10 @@ export class Debug {
     x${visibleArea.xStart.toFixed(1)} y${visibleArea.yStart.toFixed(1)}
     y${visibleArea.xEnd.toFixed(1)} y${visibleArea.yEnd.toFixed(1)}
     $enemies
+    ${Array.from(enemies).reduce(
+      (acc, cur) => (acc += cur.isVisible(visibleArea) ? 1 : 0),
+      0
+    )} / ${enemies.size}
     `;
     const debugInfoLines = debugInfo.split("\n").filter((e) => e !== "");
 

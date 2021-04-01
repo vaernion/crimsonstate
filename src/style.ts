@@ -1,4 +1,4 @@
-export const colors = {
+export const themeColor = {
   c1: "#dc143c", // "crimson"
   c2: "#c11f6d",
   c3: "#923d88",
@@ -13,9 +13,9 @@ export const debugColor = {
 };
 
 export const menuColor = {
-  bg: colors.c6,
-  button: colors.c3,
-  buttonSelected: colors.c2,
+  bg: themeColor.c6,
+  button: themeColor.c3,
+  buttonSelected: themeColor.c2,
   buttonText: "black",
 };
 
@@ -33,6 +33,12 @@ export const playerColor = {
   outline: "red",
 };
 
+export const entityColor = {
+  default: "black",
+};
+
 export const enemyColor = {
-  fill: "purple",
+  normal: "purple",
+  fast: "orange",
+  slow: "crimson",
 };
