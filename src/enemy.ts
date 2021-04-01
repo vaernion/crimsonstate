@@ -9,6 +9,10 @@ export class Enemy extends MovingEntity {
   ) {
     super();
     this.type = "enemy_" + enemyType.type;
+    this.acceleration = new Vector(
+      enemyType.acceleration,
+      enemyType.acceleration
+    );
     this.width = enemyType.width;
     this.height = enemyType.height;
     this.health = enemyType.health;

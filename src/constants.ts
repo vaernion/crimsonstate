@@ -20,13 +20,15 @@ export const constants = {
     maxSpeed: 10,
   },
   enemy: {
-    maxCount: 100,
+    maxCount: 1,
     spawnDelay: 500,
   },
 };
 
 export interface EnemyType {
   type: string;
+  maxSpeed: number;
+  acceleration: number;
   width: number;
   height: number;
   health: number;
@@ -37,6 +39,8 @@ export interface EnemyType {
 export const enemyTypes: { [k: string]: EnemyType } = {
   normal: {
     type: "normal",
+    acceleration: 1,
+    maxSpeed: 10,
     width: 20,
     height: 20,
     health: 50,
@@ -45,6 +49,8 @@ export const enemyTypes: { [k: string]: EnemyType } = {
   },
   fast: {
     type: "fast",
+    acceleration: 1.4,
+    maxSpeed: 13,
     width: 10,
     height: 10,
     health: 30,
@@ -53,6 +59,8 @@ export const enemyTypes: { [k: string]: EnemyType } = {
   },
   slow: {
     type: "slow",
+    acceleration: 0.3,
+    maxSpeed: 8,
     width: 30,
     height: 30,
     health: 200,

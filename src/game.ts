@@ -176,7 +176,9 @@ export class Game {
       // other entitites movement or triggers
       // for (const entity in staticEntities) {}
       // for (const entity in movingEntitites) {}
-      enemies.forEach((enemy) => enemy.update(controls, world, frames));
+      enemies.forEach((enemy) => {
+        enemy.update(controls, world, frames);
+      });
 
       // calculate ability
 
@@ -321,7 +323,7 @@ export class Game {
       this.cancelLoop();
       console.log("world", this.world);
       console.log("player", this.player);
-      console.log("enemies", this.enemies);
+      console.table(this.enemies);
     }
     // show enemies, for debugging
     else if (controls.specialKeyBuffer === ControlsKeys.one) {

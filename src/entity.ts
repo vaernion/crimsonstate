@@ -12,6 +12,13 @@ export class Vector {
     const magnitude = Math.sqrt(this.x ** 2 + this.y ** 2);
     if (magnitude) this.x /= magnitude;
     if (magnitude) this.y /= magnitude;
+    return this;
+  }
+
+  static directionToTarget(source: Vector, target: Vector) {
+    let distance = new Vector(target.x - source.x, target.y - source.y);
+    let direction = distance.normalize();
+    return direction;
   }
 }
 

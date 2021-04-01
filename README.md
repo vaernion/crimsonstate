@@ -17,11 +17,13 @@
 
 TypeScript, Canvas
 
-### Short term todo
+### Partial TODO
 
 asap: enemies, projectiles, damage model, weapon
 
-then: enemies movement (direction vector needed)
+then: static entities (terrain, water, plants, hazards, fire, traps), aoe damage?
+
+consider: sprites, art library
 
 ### Features
 
@@ -49,10 +51,11 @@ then: enemies movement (direction vector needed)
 | Player               | use ability                | screen (visible enemies) wipe?                  |                    |
 | Weapon               | spawn in world             |                                                 |                    |
 | Player               | pick up weapon             |                                                 |                    |
+| Controls Player?     | mouse aim                  | only when mouse inside canvas or not?           |                    |
 | Weapon               | attach to player           |                                                 |                    |
 | Projectile           | move & collide             | overload entity calculatevector (no friction)   |                    |
-| Enemy/Entity         | ranged/melee attacks       | vector math enemy -> player                     |                    |
-| Weapon               | fire projectile            | vector math player -> aim direction             |                    |
+| Enemy/Entity         | ranged/melee attacks       | vector enemy -> player                          |                    |
+| Weapon               | fire projectile            | vector player -> aim direction                  |                    |
 | World Player Entity  | powerups                   | activated on collision,various effects          |                    |
 | Player Game Controls | upgrades                   | xp, pause and select stat++ and/or ability      |                    |
 | World                | hazards                    | fire/lightning etc, damage based on delta time  |                    |
