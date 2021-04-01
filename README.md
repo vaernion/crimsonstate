@@ -34,7 +34,7 @@ consider: sprites, art library
 | Player               | movement                   |                                                 | :heavy_check_mark: |
 | Player               | entity collision           |                                                 |                    |
 | World                | world constructor          | only determines max area for now                | :heavy_check_mark: |
-| Game                 | draw world border          |                                                 | :heavy_check_mark: |
+| Game                 | world edge                 | draw & collision                                | :heavy_check_mark: |
 | Menu Controls        | pause game                 | conditional update in Game                      | :heavy_check_mark: |
 | Menu Controls        | select options             | wasd and/or mouse                               | :heavy_check_mark: |
 | Game Menu Controls   | start/reset                | hotkey too?                                     | :heavy_check_mark: |
