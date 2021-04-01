@@ -137,11 +137,10 @@ export class Game {
     // }
 
     // update delta time each update
-    // syncs game time to actual time passed
-    // and ensures game doesn't skip time when unpausing
+    // syncs game time to actual time passed * time speed
+    // and ensures game doesn't progress while paused
     frames.dt = (timestamp - frames.realTimestamp) * state.timeSpeed;
-    frames.gameTimestamp +=
-      (timestamp - frames.realTimestamp) * state.timeSpeed;
+    const gameSpeedDelta = (timestamp - frames.realTimestamp) * state.timeSpeed;
     frames.realTimestamp = timestamp;
 
     const visibleArea = world.visibleArea(this.canvas, player);
@@ -168,14 +167,16 @@ export class Game {
 
     // ---------- PLAYING ----------
     if (!state.paused) {
-      // player movement
+      frames.gameTimestamp += gameSpeedDelta;
+      frames.count++;
+
+      // player movement/actions
       player.update(controls, frames, world);
 
+      // generates new entitites if appropiate
       spawner.generate(frames, visibleArea, world, enemies);
 
-      // other entitites movement or triggers
-      // for (const entity in staticEntities) {}
-      // for (const entity in movingEntitites) {}
+      // other entitites movement/actions/triggers
       enemies.forEach((enemy) => {
         enemy.update(controls, frames, world, player);
       });
@@ -187,8 +188,6 @@ export class Game {
       // for (const projectile in projectiles) {}
       // for (const entity in staticEntities) {}
       // for (const entity in movingEntitites) {}
-
-      frames.count++;
     }
 
     controls.specialKeyBuffer = "";
@@ -236,20 +235,6 @@ export class Game {
     // world background and edge
     world.draw(canvas, ctx, visibleArea);
 
-    // debug info
-    if (controls.showDebug) {
-      debug.drawDebug(
-        canvas,
-        ctx,
-        state,
-        frames,
-        controls,
-        world,
-        player,
-        enemies
-      );
-    }
-
     // static entitities
 
     // moving entitites
@@ -271,6 +256,20 @@ export class Game {
 
     // HUD
     hud.draw(canvas, ctx, state, player);
+
+    // debug info on top
+    if (controls.showDebug) {
+      debug.drawDebug(
+        canvas,
+        ctx,
+        state,
+        frames,
+        controls,
+        world,
+        player,
+        enemies
+      );
+    }
   }
 
   private handleSpecialKeys(

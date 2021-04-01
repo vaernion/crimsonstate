@@ -6,6 +6,7 @@ import { debugColor } from "./style";
 import { World } from "./world";
 
 export class Debug {
+  public showTimestamps: boolean = true;
   public drawDebug(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
@@ -29,8 +30,17 @@ export class Debug {
       controls.isMovingDown ? "s" : ""
     }${controls.isMovingRight ? "d" : ""}
     $state ${state.hasStarted ? "started" : ""} ${state.paused ? "paused" : ""}
-    $frame ${frames.count}
-    $player speed:${player.speed().toFixed(2)}
+    $frame ${frames.count} fps ${((1000 / frames.dt) * state.timeSpeed).toFixed(
+      2
+    )}
+    ${
+      this.showTimestamps
+        ? `real ${frames.realTimestamp.toFixed(
+            0
+          )} game ${frames.gameTimestamp.toFixed(0)}`
+        : ""
+    }
+    $player speed ${player.speed().toFixed(2)}
     ❤️${player.health.toFixed(0)} h${player.height}w${player.width} ${
       controls.specialKeyBuffer === ControlsKeys.space ? "💣" : ""
     }
@@ -48,6 +58,7 @@ export class Debug {
       0
     )} / ${enemies.size}
     `;
+    // convert to array to have more than one line in canvas
     const debugInfoLines = debugInfo.split("\n").filter((e) => e !== "");
 
     ctx.fillStyle = debugColor.text;

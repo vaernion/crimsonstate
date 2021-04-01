@@ -20,8 +20,9 @@ export const constants = {
     maxSpeed: 10,
   },
   enemy: {
-    maxCount: 100,
-    spawnDelay: 200,
+    maxCount: 10,
+    spawnDelay: 1000,
+    spawnGroup: 3,
   },
 };
 

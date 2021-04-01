@@ -5,7 +5,11 @@ import { GameFrames } from "./game";
 import { VisibleArea, World } from "./world";
 
 class EntityTimestamps {
-  public lastEnemy: number = 0;
+  public lastEnemy: number = 0; // game time
+
+  public isEnemyReady(frames: GameFrames): boolean {
+    return this.lastEnemy + constants.enemy.spawnDelay < frames.gameTimestamp;
+  }
 }
 
 export class Spawner {
@@ -27,27 +31,34 @@ export class Spawner {
     enemies: Set<Enemy>
   ) {
     if (
-      frames.gameTimestamp > constants.enemy.spawnDelay &&
-      this.timestamps.lastEnemy + constants.enemy.spawnDelay <
-        frames.gameTimestamp &&
+      this.timestamps.isEnemyReady(frames) &&
       enemies.size < constants.enemy.maxCount
     ) {
-      // PLACEHODLER: unweighted random enemy selection
-      let enemyType = Object.values(enemyTypes)[
-        Math.floor(Math.random() * Object.keys(enemyTypes).length)
-      ];
-      let name = `${enemyType.type}${Entity.nextId}`;
-      let position = this.randomPosition(world);
-      let enemy = new Enemy(enemyType, name, position);
+      for (
+        let i = 0;
+        enemies.size < constants.enemy.maxCount &&
+        i < constants.enemy.spawnGroup;
+        i++
+      ) {
+        // PLACEHOLDER: unweighted random enemy selection
+        let enemyType = Object.values(enemyTypes)[
+          Math.floor(Math.random() * Object.keys(enemyTypes).length)
+        ];
+        let name = `${enemyType.type}${Entity.nextId}`;
+        let position = this.randomPosition(world);
+        let enemy = new Enemy(enemyType, name, position);
 
-      // force visible enemies outside visible range
-      // MovingEntity.fixEdgeCollision() will ensure they remain in-bounds
-      if (enemy.isVisible(visibleArea)) {
-        position.x += Math.random() > 0.5 ? world.width : -world.width;
-        position.y += Math.random() > 0.5 ? world.height : -world.height;
+        // force visible enemies outside visible range
+        // MovingEntity.fixEdgeCollision() will ensure they remain in-bounds
+        if (enemy.isVisible(visibleArea)) {
+          enemy.position.x += Math.random() > 0.5 ? world.width : -world.width;
+          enemy.position.y +=
+            Math.random() > 0.5 ? world.height : -world.height;
+        }
+
+        enemies.add(enemy);
       }
 
-      enemies.add(enemy);
       this.timestamps.lastEnemy = frames.gameTimestamp;
     }
   }
