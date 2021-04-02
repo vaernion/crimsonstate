@@ -7,38 +7,50 @@ export const themeColor = {
   c6: "#2f4858",
 };
 
-export const debugColor = {
-  text: "white",
-  shadow: "black",
-};
-
-export const menuColor = {
-  bg: themeColor.c6,
-  button: themeColor.c3,
-  buttonSelected: themeColor.c2,
-  buttonText: "black",
-};
-
-export const hudColor = {
-  health: "red",
-  pauseBox: "darkgrey",
-  pauseText: "purple",
-};
-export const worldColor = {
-  bg: "teal",
-  edge: "grey",
-};
-export const playerColor = {
-  fill: "yellow",
-  outline: "red",
-};
-
-export const entityColor = {
-  default: "black",
-};
-
-export const enemyColor = {
-  normal: "purple",
-  fast: "orange",
-  slow: "crimson",
+export const style = {
+  canvasFonts: {
+    hud: "18px sans-serif",
+    pause: "italic 1.5rem monospace",
+    menu: "1.7rem monospace",
+    debug: "0.9rem sans-serif",
+    debugSize: 16,
+  },
+  debugColor: {
+    text: "white",
+    shadow: "black",
+  },
+  menuColor: {
+    bg: themeColor.c6,
+    button: themeColor.c3,
+    buttonSelected: themeColor.c2,
+    buttonText: "black",
+  },
+  hud: {
+    alpha: 0.3,
+  },
+  hudColor: {
+    pauseBox: "darkgrey",
+    pauseText: "purple",
+    healthBg: "black",
+    healthLow: "crimson",
+    healthMed: "yellow",
+    healthMax: "lightgreen",
+    ability: "darkblue",
+  },
+  worldColor: {
+    bg: "teal",
+    edge: "grey",
+  },
+  playerColor: {
+    fill: "yellow",
+    outline: "red",
+  },
+  entityColor: {
+    default: "black",
+  },
+  enemyColor: {
+    normal: "purple",
+    fast: "orange",
+    slow: "crimson",
+  },
 };

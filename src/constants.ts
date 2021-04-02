@@ -1,8 +1,11 @@
-import { enemyColor } from "./style";
+import { style } from "./style";
 
 export const constants = {
-  canvasWidthFraction: 0.7,
-  canvasHeightFraction: 0.65,
+  canvas: {
+    ratio: 16 / 9,
+    // widthFraction: 0.9, // unused
+    heightFraction: 0.75,
+  },
   friction: 0.89,
   world: {
     width: 2000,
@@ -12,16 +15,30 @@ export const constants = {
     width: 20,
     height: 45,
     headSize: 15,
-    health: 100,
+    health: 50,
+    maxHealth: 200,
     acceleration: {
       x: 1.3,
       y: 1.3,
     },
     maxSpeed: 10,
+    consumables: {
+      initial: {
+        bomb: 3,
+        medpack: 4,
+      },
+      max: {
+        bomb: 6,
+        medpack: 6,
+      },
+      effect: {
+        medpack: 60,
+      },
+    },
   },
   enemy: {
     maxCount: 100,
-    spawnDelay: 1000,
+    spawnDelay: 2000,
     spawnGroup: 15,
   },
 };
@@ -46,7 +63,7 @@ export const enemyTypes: { [k: string]: EnemyType } = {
     height: 20,
     health: 50,
     damage: 10,
-    color: enemyColor.normal,
+    color: style.enemyColor.normal,
   },
   fast: {
     type: "fast",
@@ -56,7 +73,7 @@ export const enemyTypes: { [k: string]: EnemyType } = {
     height: 10,
     health: 30,
     damage: 5,
-    color: enemyColor.fast,
+    color: style.enemyColor.fast,
   },
   slow: {
     type: "slow",
@@ -66,6 +83,6 @@ export const enemyTypes: { [k: string]: EnemyType } = {
     height: 30,
     health: 200,
     damage: 25,
-    color: enemyColor.slow,
+    color: style.enemyColor.slow,
   },
 };

@@ -2,7 +2,7 @@ import { Controls, ControlsKeys } from "./controls";
 import { Enemy } from "./enemy";
 import { GameFrames, GameState } from "./game";
 import { Player } from "./player";
-import { debugColor } from "./style";
+import { style } from "./style";
 import { World } from "./world";
 
 export class Debug {
@@ -47,11 +47,15 @@ export class Debug {
     x${player.position.x.toFixed(1)} y${player.position.y.toFixed(1)}
     vx${player.velocity.x.toFixed(1)} vy${player.velocity.y.toFixed(1)}
     ax${player.acceleration.x.toFixed(1)} ay${player.acceleration.y.toFixed(1)}
+    items: 💣 ${player.consumables.inventory.bomb} ❤️${
+      player.consumables.inventory.medpack
+    }
     $world ⌛${state.timeSpeed}
-    ${world.width}x${world.height}
+    ${world.width}*${world.height}
     $camera
     x${visibleArea.xStart.toFixed(1)} y${visibleArea.yStart.toFixed(1)}
     y${visibleArea.xEnd.toFixed(1)} y${visibleArea.yEnd.toFixed(1)}
+    $canvas ${canvas.width}*${canvas.height}
     $enemies
     ${Array.from(enemies).reduce(
       (acc, cur) => (acc += cur.isVisible(visibleArea) ? 1 : 0),
@@ -61,18 +65,17 @@ export class Debug {
     // convert to array to have more than one line in canvas
     const debugInfoLines = debugInfo.split("\n").filter((e) => e !== "");
 
-    ctx.fillStyle = debugColor.text;
+    ctx.fillStyle = style.debugColor.text;
     ctx.shadowOffsetX = 3;
     ctx.shadowOffsetY = 3;
-    ctx.shadowColor = debugColor.shadow;
+    ctx.shadowColor = style.debugColor.shadow;
     ctx.shadowBlur = 3;
-    const fontSize = parseInt(ctx.font.split(" ")[0]) * 1.2;
-    ctx.font = `${fontSize}px sans-serif`;
+    ctx.font = style.canvasFonts.debug;
     for (let i = 0; i < debugInfoLines.length; i++) {
       ctx.fillText(
         debugInfoLines[i],
         canvas.width * 0.8,
-        canvas.height * 0.1 + i * fontSize,
+        canvas.height * 0.1 + i * style.canvasFonts.debugSize,
         canvas.width * 0.2 // max width, attempts to fit within limit
       );
     }

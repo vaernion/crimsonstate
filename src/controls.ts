@@ -11,6 +11,7 @@ export enum ControlsKeys {
   space = " ", // ability/select
   enter = "Enter", // alternative for space
   // r = "r", // reload
+  f = "f", // next ability
   esc = "Escape",
   p = "p", // pause
   v = "v", // restart
@@ -24,6 +25,7 @@ type SpecialKeyBuffer =
   | ""
   | ControlsKeys.space
   | ControlsKeys.enter
+  | ControlsKeys.f
   | ControlsKeys.esc
   | ControlsKeys.p
   | ControlsKeys.v
@@ -77,6 +79,9 @@ export class Controls {
       case ControlsKeys.space:
       case ControlsKeys.enter:
         if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.space;
+        break;
+      case ControlsKeys.f:
+        if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.f;
         break;
       case ControlsKeys.p:
         if (ev.type === "keydown") this.specialKeyBuffer = ControlsKeys.p;

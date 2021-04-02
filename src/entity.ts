@@ -2,7 +2,7 @@ import { constants } from "./constants";
 import { Controls } from "./controls";
 import { GameFrames } from "./game";
 import { Player } from "./player";
-import { entityColor } from "./style";
+import { style } from "./style";
 import { VisibleArea, World } from "./world";
 
 export class Vector {
@@ -63,11 +63,11 @@ export class Entity {
     world: World,
     player: Player
   ) {
-    ctx.fillStyle = entityColor.default;
+    ctx.fillStyle = style.entityColor.default;
 
     const visibleArea = world.visibleArea(canvas, player);
     if (this.isVisible(visibleArea)) {
-      ctx.fillStyle = this.color || entityColor.default;
+      ctx.fillStyle = this.color || style.entityColor.default;
       ctx.fillRect(
         this.position.x - visibleArea.xStart - this.width / 2,
         this.position.y - visibleArea.yStart - this.height / 2,

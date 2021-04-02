@@ -49,7 +49,8 @@ consider: sprites, art library
 | MovingEntity         | move towards player        |                                                 | :heavy_check_mark: |
 | Entity               | take damage & destruction  | enemies.delete(this) should work                |                    |
 | Game Player          | win/lose conditions        | lose: death, win: score/kills/time              |                    |
-| Player               | use ability                | screen (visible enemies) wipe?                  |                    |
+| Player               | use ability                | screen (visible enemies?) wipe, heal item       | :heavy_check_mark: |
+| Player               | ability variety            | more consumables and/or cooldown based          |                    |
 | Game Weapon          | spawn in world             |                                                 |                    |
 | Controls Player?     | mouse aim                  | only when mouse inside canvas or not?           |                    |
 | Player Weapon HUD    | pick up weapon             | on collision? attached? visuals? HUD?           |                    |

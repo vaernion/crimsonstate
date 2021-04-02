@@ -38,15 +38,13 @@ export class Game {
   private spawner: Spawner = new Spawner();
   private enemies: Set<Enemy> = new Set();
 
-  constructor(
-    canvas: HTMLCanvasElement,
-    canvasWidth: number,
-    canvasHeight: number,
-    worldWidth: number,
-    worldHeight: number
-  ) {
-    this.world = new World(worldWidth, worldHeight);
-    this.player = new Player(this.world, constants.player.health);
+  constructor(canvas: HTMLCanvasElement) {
+    this.world = new World(constants.world.width, constants.world.height);
+    this.player = new Player(
+      this.world,
+      constants.player.health,
+      constants.player.maxHealth
+    );
     this.canvas = canvas;
     const ctx = canvas.getContext("2d");
     if (ctx) {
@@ -54,8 +52,8 @@ export class Game {
     } else {
       throw new Error("canvas context is null");
     }
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
+    this.canvas.height = window.innerHeight * constants.canvas.heightFraction;
+    this.canvas.width = this.canvas.height * constants.canvas.ratio;
   }
 
   private start() {
@@ -77,7 +75,11 @@ export class Game {
     this.menu = new Menu();
     this.hud = new HUD();
     this.world = new World(this.world.width, this.world.height);
-    this.player = new Player(this.world, constants.player.health);
+    this.player = new Player(
+      this.world,
+      constants.player.health,
+      constants.player.maxHealth
+    );
     this.spawner = new Spawner();
     this.enemies = new Set();
   }
@@ -157,7 +159,16 @@ export class Game {
 
     // ---------- HANDLE SPECIALKEYBUFFER ----------
     if (!menu.isShowingMenu) {
-      this.handleSpecialKeys(timestamp, state, menu, controls, player);
+      this.handleSpecialKeys(
+        timestamp,
+        state,
+        frames,
+        menu,
+        controls,
+        world,
+        player,
+        enemies
+      );
     }
     // ---------- HANDLE MENU ----------
     else {
@@ -207,8 +218,8 @@ export class Game {
     enemies: Set<Enemy>
   ): void {
     // dynamic canvas resize
-    canvas.width = window.innerWidth * constants.canvasWidthFraction;
-    canvas.height = window.innerHeight * constants.canvasHeightFraction;
+    canvas.height = window.innerHeight * constants.canvas.heightFraction;
+    canvas.width = canvas.height * constants.canvas.ratio;
 
     // menu screen
     if (menu.isShowingMenu) {
@@ -266,9 +277,12 @@ export class Game {
   private handleSpecialKeys(
     timestamp: DOMHighResTimeStamp,
     state: GameState,
+    frames: GameFrames,
     menu: Menu,
     controls: Controls,
-    player: Player
+    world: World,
+    player: Player,
+    enemies: Set<Enemy>
   ) {
     // console.log(controls.specialKeyBuffer);
     if (controls.specialKeyBuffer === ControlsKeys.v) {
@@ -278,13 +292,16 @@ export class Game {
     else if (controls.specialKeyBuffer === ControlsKeys.z) {
       state.timeSpeed = state.timeSpeed > 1 ? 1.0 : 3.0;
     }
+    // select next ability
+    else if (!state.paused && controls.specialKeyBuffer === ControlsKeys.f) {
+      player.selectNextAbility();
+    }
     // use ability
     else if (
-      !menu.isShowingMenu &&
       !state.paused &&
       controls.specialKeyBuffer === ControlsKeys.space
     ) {
-      player.useAbility();
+      player.useAbility(frames, world, enemies);
     }
     // open level up screen
     else if (false) {

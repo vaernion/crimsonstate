@@ -1,5 +1,5 @@
 import { Player } from "./player";
-import { worldColor } from "./style";
+import { style } from "./style";
 
 export interface VisibleArea {
   xStart: number;
@@ -44,7 +44,7 @@ export class World {
     ctx: CanvasRenderingContext2D,
     visibleArea: VisibleArea
   ) {
-    ctx.fillStyle = worldColor.bg;
+    ctx.fillStyle = style.worldColor.bg;
     ctx.fillRect(0, 0, visibleArea.width, visibleArea.height);
   }
 
@@ -53,7 +53,7 @@ export class World {
     ctx: CanvasRenderingContext2D,
     visibleArea: VisibleArea
   ) {
-    ctx.fillStyle = worldColor.edge;
+    ctx.fillStyle = style.worldColor.edge;
 
     // top edge
     ctx.fillRect(

@@ -31,6 +31,10 @@ a:hover {
   background-color: rgb(24, 23, 23);
 }
 
+#help {
+  margin-top: 10rem;
+}
+
 .list-none {
   list-style: none;
 }
