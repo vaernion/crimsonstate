@@ -11,7 +11,9 @@ import { World } from "./world";
 export class GameState {
   public paused: boolean = true;
   public hasStarted: boolean = false;
-  public timeSpeed: number = 1.0;
+  public timeSpeedCustom: number = 1.0;
+  public timeSpeedWorld: number = 0.5;
+  public timeSpeed = () => this.timeSpeedWorld * this.timeSpeedCustom;
 }
 export class GameFrames {
   public count: number = 0; // total number
@@ -141,8 +143,7 @@ export class Game {
     // update delta time each update
     // syncs game time to actual time passed * time speed
     // and ensures game doesn't progress while paused
-    frames.dt = (timestamp - frames.realTimestamp) * state.timeSpeed;
-    const gameSpeedDelta = (timestamp - frames.realTimestamp) * state.timeSpeed;
+    frames.dt = (timestamp - frames.realTimestamp) * state.timeSpeed();
     frames.realTimestamp = timestamp;
 
     const visibleArea = world.visibleArea(this.canvas, player);
@@ -178,7 +179,7 @@ export class Game {
 
     // ---------- PLAYING ----------
     if (!state.paused) {
-      frames.gameTimestamp += gameSpeedDelta;
+      frames.gameTimestamp += frames.dt;
       frames.count++;
 
       // player movement/actions
@@ -290,7 +291,8 @@ export class Game {
     }
     // change speed (time factor)
     else if (controls.specialKeyBuffer === ControlsKeys.z) {
-      state.timeSpeed = state.timeSpeed > 1 ? 1.0 : 3.0;
+      state.timeSpeedCustom =
+        state.timeSpeedCustom > 1 ? 0.5 : state.timeSpeedCustom < 1 ? 1.0 : 3.0;
     }
     // select next ability
     else if (!state.paused && controls.specialKeyBuffer === ControlsKeys.f) {

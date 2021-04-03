@@ -30,9 +30,10 @@ export class Debug {
       controls.isMovingDown ? "s" : ""
     }${controls.isMovingRight ? "d" : ""}
     $state ${state.hasStarted ? "started" : ""} ${state.paused ? "paused" : ""}
-    $frame ${frames.count} fps ${((1000 / frames.dt) * state.timeSpeed).toFixed(
-      2
-    )}
+    $frame ${frames.count} fps ${(
+      (1000 / frames.dt) *
+      state.timeSpeed()
+    ).toFixed(1)}
     ${
       this.showTimestamps
         ? `real ${frames.realTimestamp.toFixed(
@@ -50,7 +51,7 @@ export class Debug {
     items: 💣 ${player.consumables.inventory.bomb} ❤️${
       player.consumables.inventory.medpack
     }
-    $world ⌛${state.timeSpeed}
+    $world ⌛${state.timeSpeed()}
     ${world.width}*${world.height}
     $camera
     x${visibleArea.xStart.toFixed(1)} y${visibleArea.yStart.toFixed(1)}
