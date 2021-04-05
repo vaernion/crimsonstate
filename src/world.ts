@@ -1,5 +1,5 @@
+import { style } from "./data/style";
 import { Player } from "./player";
-import { style } from "./style";
 
 export interface VisibleArea {
   xStart: number;

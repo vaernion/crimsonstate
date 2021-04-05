@@ -1,14 +1,16 @@
-import { constants, enemyTypes } from "./constants";
+import { constants } from "./data/constants";
+import { enemyVariants } from "./data/entities";
 import { Enemy } from "./enemy";
 import { Entity, Vector } from "./entity";
 import { GameFrames } from "./game";
+import { Player } from "./player";
 import { VisibleArea, World } from "./world";
 
 class EntityTimestamps {
   public lastEnemy: number = 0; // game time
 
   public isEnemyReady(frames: GameFrames): boolean {
-    return this.lastEnemy + constants.enemy.spawnDelay < frames.gameTimestamp;
+    return this.lastEnemy + constants.enemy.spawnDelay < frames.gameTime;
   }
 }
 
@@ -19,6 +21,7 @@ export class Spawner {
     frames: GameFrames,
     visibleArea: VisibleArea,
     world: World,
+    player: Player,
     enemies: Set<Enemy>
   ) {
     this.generateEnemy(frames, visibleArea, world, enemies);
@@ -41,12 +44,12 @@ export class Spawner {
         i++
       ) {
         // PLACEHOLDER: unweighted random enemy selection
-        let enemyType = Object.values(enemyTypes)[
-          Math.floor(Math.random() * Object.keys(enemyTypes).length)
+        let enemyVariant = Object.values(enemyVariants)[
+          Math.floor(Math.random() * Object.keys(enemyVariants).length)
         ];
-        let name = `${enemyType.type}${Entity.nextId}`;
+        let name = `${enemyVariant.variant}${Entity.nextId}`;
         let position = this.randomPosition(world);
-        let enemy = new Enemy(enemyType, name, position);
+        let enemy = new Enemy(enemyVariant, name, position);
 
         // force visible enemies outside visible range
         // MovingEntity.fixEdgeCollision() will ensure they remain in-bounds
@@ -59,7 +62,7 @@ export class Spawner {
         enemies.add(enemy);
       }
 
-      this.timestamps.lastEnemy = frames.gameTimestamp;
+      this.timestamps.lastEnemy = frames.gameTime;
     }
   }
 

@@ -1,8 +1,8 @@
-import { Controls, ControlsKeys } from "./controls";
+import { Controls } from "./controls";
+import { style } from "./data/style";
 import { Enemy } from "./enemy";
 import { GameFrames, GameState } from "./game";
 import { Player } from "./player";
-import { style } from "./style";
 import { World } from "./world";
 
 export class Debug {
@@ -20,15 +20,16 @@ export class Debug {
     ctx.save();
 
     const visibleArea = world.visibleArea(canvas, player);
+    const aim = controls.aim.normalize();
 
     // this unreadable mess is shown as debuginfo by Game.draw()
     const debugInfo = `
-    ${controls.specialKeyBuffer}${
-      controls.specialKeyBuffer === " " ? "space" : ""
-    }
-    ${controls.isMovingUp ? "w" : ""}${controls.isMovingLeft ? "a" : ""}${
-      controls.isMovingDown ? "s" : ""
-    }${controls.isMovingRight ? "d" : ""}
+    ${controls.keys.space ? "space" : ""} ${controls.keys.pause ? "p" : ""} ${
+      controls.keys.nextAbility ? "f" : ""
+    } ${controls.keys.timeSpeed ? "z" : ""}
+    ${controls.keys.up ? "w" : ""}${controls.keys.left ? "a" : ""}${
+      controls.keys.down ? "s" : ""
+    }${controls.keys.right ? "d" : ""} ${controls.keys.mouse1 ? "m1" : ""}
     $state ${state.hasStarted ? "started" : ""} ${state.paused ? "paused" : ""}
     $frame ${frames.count} fps ${(
       (1000 / frames.dt) *
@@ -36,18 +37,18 @@ export class Debug {
     ).toFixed(1)}
     ${
       this.showTimestamps
-        ? `real ${frames.realTimestamp.toFixed(
+        ? `real ${frames.realTime.toFixed(0)} game ${frames.gameTime.toFixed(
             0
-          )} game ${frames.gameTimestamp.toFixed(0)}`
+          )}`
         : ""
     }
     $player speed ${player.speed().toFixed(2)}
-    ❤️${player.health.toFixed(0)} h${player.height}w${player.width} ${
-      controls.specialKeyBuffer === ControlsKeys.space ? "💣" : ""
-    }
+    ❤️${player.health.toFixed(0)} h${player.height}w${player.width}
     x${player.position.x.toFixed(1)} y${player.position.y.toFixed(1)}
     vx${player.velocity.x.toFixed(1)} vy${player.velocity.y.toFixed(1)}
     ax${player.acceleration.x.toFixed(1)} ay${player.acceleration.y.toFixed(1)}
+    aim x${controls.aim.x} y${controls.aim.y}
+    aimN x${aim.x.toFixed(2)} y${aim.y.toFixed(2)}
     items: 💣 ${player.consumables.inventory.bomb} ❤️${
       player.consumables.inventory.medpack
     }

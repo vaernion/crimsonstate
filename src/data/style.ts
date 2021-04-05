@@ -36,6 +36,8 @@ export const style = {
     healthMed: "yellow",
     healthMax: "lightgreen",
     ability: "darkblue",
+    weaponBg: "black",
+    weapon: "lightblue",
   },
   worldColor: {
     bg: "teal",

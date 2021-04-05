@@ -20,11 +20,11 @@ TypeScript, Canvas
 
 ### Partial TODO
 
-asap: enemies, entity collision detection, projectiles, damage model, weapon
+asap: entity collision detection, damage inflicted, weapon spawns/pickup
 
 then: static entities (terrain, water, plants, hazards, fire, traps), aoe damage?
 
-consider: sprites, art library
+consider: sprites, art library, music, sound effects
 
 ### Features
 
@@ -51,12 +51,12 @@ consider: sprites, art library
 | Game Player          | win/lose conditions        | lose: death, win: score/kills/time              |                    |
 | Player               | use ability                | screen (visible enemies?) wipe, heal item       | :heavy_check_mark: |
 | Player               | ability variety            | more consumables and/or cooldown based          |                    |
+| Controls Player?     | mouse aim                  | only when mouse inside canvas or not?           | :heavy_check_mark: |
+| Weapon Controls      | fire projectile            | mouse1, vector player -> aim direction          | :heavy_check_mark: |
 | Game Weapon          | spawn in world             |                                                 |                    |
-| Controls Player?     | mouse aim                  | only when mouse inside canvas or not?           |                    |
-| Player Weapon HUD    | pick up weapon             | on collision? attached? visuals? HUD?           |                    |
+| Player Weapon        | pick up weapon             | on collision? attached? visuals?                |                    |
 | Entity Projectile    | move & collide             | overload entity calculatevector (no friction)   |                    |
-| Entity Enemy         | ranged/melee attacks       | vector enemy -> player                          |                    |
-| Weapon Controls      | fire projectile            | mouse1, vector player -> aim direction          |                    |
+| Entity Enemy         | enemy ranged attacks       | vector enemy -> player                          | :heavy_check_mark: |
 | World Player Entity  | powerups                   | activated on collision,various effects          |                    |
 | Player Game Controls | upgrades                   | xp, pause and select stat++ and/or ability      |                    |
 | World                | static entities (terrain)  | with collision                                  |                    |

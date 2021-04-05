@@ -1,58 +1,52 @@
-import { Controls, ControlsKeys } from "./controls";
-import { GameState } from "./game";
-import { style, themeColor } from "./style";
+import { Controls, InputsActive } from "./controls";
+import { style, themeColor } from "./data/style";
+import { GameFrames, GameState } from "./game";
 
 export class Menu {
   public isShowingMenu: boolean = true;
   public isStartingGame: boolean = false;
   private menuItems = this.initMenuItems();
   private selectedItemIndex: number = 0;
-  private lastMenuInteractionTimestamp: DOMHighResTimeStamp = 0;
+  private lastMenuInteractionTimestamp: number = 0;
   private menuInteractionCooldown: number = 250; // necessary to prevent one interaction per update
 
-  public isCoolingDown(timestamp: DOMHighResTimeStamp) {
+  public isCoolingDown(timestamp: number) {
     return (
       this.lastMenuInteractionTimestamp + this.menuInteractionCooldown >
       timestamp
     );
   }
 
-  public update(
-    controls: Controls,
-    timestamp: DOMHighResTimeStamp,
-    state: GameState
-  ) {
+  public update(controls: Controls, frames: GameFrames, state: GameState) {
     // interaction cooldown
-    if (this.isCoolingDown(timestamp)) {
+    if (this.isCoolingDown(frames.realTime)) {
       return;
     }
     // up
-    if (controls.isMovingUp) {
+    if (controls.keys.up) {
       this.selectedItemIndex =
         this.selectedItemIndex - 1 >= 0
           ? this.selectedItemIndex - 1
           : this.menuItems.length - 1;
     }
     // down
-    if (controls.isMovingDown) {
+    if (controls.keys.down) {
       this.selectedItemIndex =
         (this.selectedItemIndex + 1) % this.menuItems.length;
     }
     // activate
-    if (controls.specialKeyBuffer === ControlsKeys.space) {
+    if (controls.keys.space) {
       this.menuItems[this.selectedItemIndex].onactivation();
+      controls.keys = new InputsActive(); // catch-all to avoid accidental actions
     }
     // return from submenu or resume game
-    else if (
-      controls.specialKeyBuffer === ControlsKeys.esc &&
-      state.hasStarted
-    ) {
+    else if (controls.keys.esc && state.hasStarted) {
       this.isShowingMenu = false;
       state.paused = false;
+      controls.keys = new InputsActive(); // catch-all to avoid accidental actions
     }
 
-    controls.specialKeyBuffer = "";
-    this.lastMenuInteractionTimestamp = timestamp;
+    this.lastMenuInteractionTimestamp = frames.realTime;
   }
 
   public draw(

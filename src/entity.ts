@@ -1,8 +1,11 @@
-import { constants } from "./constants";
 import { Controls } from "./controls";
+import { constants } from "./data/constants";
+import { EntityType } from "./data/entities";
+import { style } from "./data/style";
 import { GameFrames } from "./game";
 import { Player } from "./player";
-import { style } from "./style";
+import { Projectile } from "./projectile";
+import { Weapon } from "./weapon";
 import { VisibleArea, World } from "./world";
 
 export class Vector {
@@ -10,9 +13,10 @@ export class Vector {
 
   public normalize() {
     const magnitude = Math.sqrt(this.x ** 2 + this.y ** 2);
-    if (magnitude) this.x /= magnitude;
-    if (magnitude) this.y /= magnitude;
-    return this;
+    const normalized = new Vector(this.x, this.y);
+    if (magnitude) normalized.x /= magnitude;
+    if (magnitude) normalized.y /= magnitude;
+    return normalized;
   }
 
   static directionToTarget(source: Vector, target: Vector) {
@@ -25,14 +29,17 @@ export class Vector {
 export class Entity {
   static nextId = 0;
   public id: number;
-  public type: string = "";
+  public type: EntityType = EntityType.default;
+  public name: string = "";
   public position = new Vector();
   public width: number = 0;
   public height: number = 0;
   public health: number = 0;
   public maxHealth: number = 0;
+  public isDestroyed: boolean = false;
   public isInvincible: boolean = false;
   public color: string = "";
+  public weapon?: Weapon;
 
   constructor() {
     this.id = ++Entity.nextId;
@@ -51,6 +58,7 @@ export class Entity {
     controls: Controls,
     frames: GameFrames,
     world: World,
+    projectiles: Set<Projectile>,
     player: Player
   ) {
     // damage nearby stuff if hazard
@@ -91,26 +99,23 @@ export class MovingEntity extends Entity {
     controls: Controls,
     frames: GameFrames,
     world: World,
+    projectiles: Set<Projectile>,
     player: Player
   ) {
-    this.move(controls, frames, world, player);
+    // default direction == player.position
+    const direction = Vector.directionToTarget(this.position, player.position);
+    this.move(direction, frames, world);
     // PLACEHOLDER: interact with other objects
   }
 
-  public move(
-    controls: Controls,
-    frames: GameFrames,
-    world: World,
-    player: Player
-  ) {
-    const direction = Vector.directionToTarget(this.position, player.position);
+  public move(direction: Vector, frames: GameFrames, world: World) {
     this.calculatePosition(direction, frames);
     this.fixEntityCollision();
     this.fixEdgeCollision(world);
   }
 
   public calculatePosition(direction: Vector, frames: GameFrames) {
-    const dtFactor = frames.dt / frames.referenceRefresh;
+    const dtFactor = frames.dt / frames.dtFixed;
 
     // accelerate
     this.velocity.x += this.acceleration.x * direction.x;
@@ -121,7 +126,7 @@ export class MovingEntity extends Entity {
 
     // restrict to max speed
     if (this.speed() > this.maxSpeed) {
-      this.velocity.normalize();
+      this.velocity = this.velocity.normalize();
       this.velocity.x *= this.maxSpeed;
       this.velocity.y *= this.maxSpeed;
     }

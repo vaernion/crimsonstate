@@ -1,9 +1,13 @@
-import { constants } from "./constants";
 import { Controls } from "./controls";
+import { constants } from "./data/constants";
+import { EntityType } from "./data/entities";
+import { style } from "./data/style";
+import { WeaponName } from "./data/weapons";
 import { Enemy } from "./enemy";
 import { MovingEntity, Vector } from "./entity";
 import { GameFrames } from "./game";
-import { style } from "./style";
+import { Projectile } from "./projectile";
+import { Weapon } from "./weapon";
 import { World } from "./world";
 
 enum Consumable {
@@ -35,27 +39,55 @@ class Consumables {
 }
 
 export class Player extends MovingEntity {
-  private headSize = constants.player.headSize; // placeholder until proper images
   public consumables = new Consumables();
+  private headSize = constants.player.headSize; // placeholder until proper images
+  public type = EntityType.player;
 
   constructor(world: World, health: number, maxHealth: number) {
     super();
+    this.name = "player";
+
     this.position.x = world.width / 2;
     this.position.y = world.height / 2;
     this.acceleration = new Vector(
       constants.player.acceleration.x,
       constants.player.acceleration.y
     );
+
     this.maxSpeed = constants.player.maxSpeed;
     this.health = health;
     this.maxHealth = maxHealth;
     this.width = constants.player.width;
     this.height = constants.player.height;
+    this.weapon = new Weapon(WeaponName.m4);
   }
 
-  public update(controls: Controls, frames: GameFrames, world: World) {
-    this.move(controls, frames, world);
-    // PLACEHOLDER: shoot and stuff
+  public update(
+    controls: Controls,
+    frames: GameFrames,
+    world: World,
+    projectiles: Set<Projectile>
+  ) {
+    const direction = this.getDirection(controls);
+    this.move(direction, frames, world);
+
+    // check if reload is done
+    if (
+      this.weapon?.isReloading &&
+      this.weapon?.isReloadDone(frames.gameTime)
+    ) {
+      this.weapon.finishReload();
+    }
+
+    if (controls.keys.mouse1) {
+      this.attack(
+        controls,
+        frames,
+        world,
+        projectiles,
+        controls.aim.normalize()
+      );
+    }
   }
 
   public draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
@@ -81,30 +113,44 @@ export class Player extends MovingEntity {
     ctx.stroke();
   }
 
-  public move(controls: Controls, frames: GameFrames, world: World) {
-    const direction = this.getDirection(controls);
-    this.calculatePosition(direction, frames);
-    this.fixEntityCollision();
-    this.fixEdgeCollision(world);
+  public attack(
+    controls: Controls,
+    frames: GameFrames,
+    world: World,
+    projectiles: Set<Projectile>,
+    direction: Vector
+  ) {
+    if (this.weapon?.shoot(frames.gameTime)) {
+      const projectile = new Projectile(
+        this.type,
+        this.name,
+        new Vector(this.position.x, this.position.y),
+        direction,
+        this.weapon.projectileVariant,
+        this.weapon.damage,
+        this.weapon.penetration
+      );
+      projectiles.add(projectile);
+    }
   }
 
   private getDirection(controls: Controls) {
     let direction = new Vector();
 
     // direction
-    if (controls.isMovingRight) {
+    if (controls.keys.right) {
       direction.x += 1;
     }
-    if (controls.isMovingLeft) {
+    if (controls.keys.left) {
       direction.x -= 1;
     }
-    if (controls.isMovingUp) {
+    if (controls.keys.up) {
       direction.y -= 1;
     }
-    if (controls.isMovingDown) {
+    if (controls.keys.down) {
       direction.y += 1;
     }
-    direction.normalize();
+    direction = direction.normalize();
     return direction;
   }
 

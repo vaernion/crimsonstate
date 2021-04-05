@@ -1,10 +1,11 @@
-import { constants } from "./constants";
-import { Controls, ControlsKeys } from "./controls";
+import { Controls, InputsActive } from "./controls";
+import { constants } from "./data/constants";
 import { Debug } from "./debug";
 import { Enemy } from "./enemy";
 import { HUD } from "./hud";
 import { Menu } from "./menu";
 import { Player } from "./player";
+import { Projectile } from "./projectile";
 import { Spawner } from "./spawner";
 import { World } from "./world";
 
@@ -12,15 +13,16 @@ export class GameState {
   public paused: boolean = true;
   public hasStarted: boolean = false;
   public timeSpeedCustom: number = 1.0;
-  public timeSpeedWorld: number = 0.5;
+  public timeSpeedWorld: number = 1.0;
   public timeSpeed = () => this.timeSpeedWorld * this.timeSpeedCustom;
 }
 export class GameFrames {
-  public count: number = 0; // total number
-  public realTimestamp: DOMHighResTimeStamp = 0; // real world
-  public gameTimestamp: number = 0; // ingame time
+  public count: number = 0; // total number of frames
+  public realTime: number = 0; // real world
+  public gameTime: number = 0; // ingame time
   public dt: number = 0; // ms
-  public referenceRefresh: number = 1000 / 60; // 16.67ms 60fps
+  public dtFixed: number = 1000 / 60; // 16.67ms 60fps
+  public lag: number = 0; // accumulated dt
 }
 
 export class Game {
@@ -34,11 +36,12 @@ export class Game {
 
   private menu: Menu = new Menu();
   private hud: HUD = new HUD();
-  private controls: Controls = new Controls(document);
+  private controls: Controls;
   private world: World;
   private player: Player;
   private spawner: Spawner = new Spawner();
   private enemies: Set<Enemy> = new Set();
+  private projectiles: Set<Projectile> = new Set();
 
   constructor(canvas: HTMLCanvasElement) {
     this.world = new World(constants.world.width, constants.world.height);
@@ -56,18 +59,18 @@ export class Game {
     }
     this.canvas.height = window.innerHeight * constants.canvas.heightFraction;
     this.canvas.width = this.canvas.height * constants.canvas.ratio;
+    this.controls = new Controls(document, canvas);
   }
 
   private start() {
     this.state.hasStarted = true;
-    this.state.paused = false;
     this.menu.isStartingGame = false;
     this.menu.isShowingMenu = false;
+    this.state.paused = false;
   }
 
-  private pause() {
+  private togglePause() {
     this.state.paused = !this.state.paused;
-    this.controls.specialKeyBuffer = "";
   }
 
   private restart() {
@@ -84,6 +87,8 @@ export class Game {
     );
     this.spawner = new Spawner();
     this.enemies = new Set();
+    this.projectiles = new Set();
+    this.controls.keys = new InputsActive();
   }
 
   public initLoop() {
@@ -106,7 +111,8 @@ export class Game {
       this.world,
       this.player,
       this.spawner,
-      this.enemies
+      this.enemies,
+      this.projectiles
     );
     this.draw(
       this.canvas,
@@ -119,7 +125,8 @@ export class Game {
       this.controls,
       this.world,
       this.player,
-      this.enemies
+      this.enemies,
+      this.projectiles
     );
   }
 
@@ -132,7 +139,8 @@ export class Game {
     world: World,
     player: Player,
     spawner: Spawner,
-    enemies: Set<Enemy>
+    enemies: Set<Enemy>,
+    projectiles: Set<Projectile>
   ): void {
     // skip certain frames mod 10 for delta time testing
     // if ([0, 1, 3, 5, 6, 7].includes(this.frames.count % 10)) {
@@ -143,25 +151,37 @@ export class Game {
     // update delta time each update
     // syncs game time to actual time passed * time speed
     // and ensures game doesn't progress while paused
-    frames.dt = (timestamp - frames.realTimestamp) * state.timeSpeed();
-    frames.realTimestamp = timestamp;
+    frames.dt = (timestamp - frames.realTime) * state.timeSpeed();
+    frames.realTime = timestamp;
 
     const visibleArea = world.visibleArea(this.canvas, player);
 
-    // ---------- PAUSE ----------
-    if (controls.specialKeyBuffer === ControlsKeys.p && !menu.isShowingMenu) {
-      this.pause();
+    // // ---------- PAUSE ----------
+    // can buffer key activations during pause
+    // seems to not cause issues, otherwise should reset controls.keys
+    if (controls.keys.pause && !menu.isShowingMenu) {
+      this.togglePause();
+      this.controls.keys.pause = false;
     }
 
     // ---------- START ----------
-    else if (menu.isStartingGame) {
+    if (menu.isStartingGame) {
       this.start();
     }
 
-    // ---------- HANDLE SPECIALKEYBUFFER ----------
-    if (!menu.isShowingMenu) {
-      this.handleSpecialKeys(
-        timestamp,
+    // ---------- HANDLE MENU ----------
+    if (state.paused && menu.isShowingMenu) {
+      menu.update(controls, frames, state);
+      return; // prevents timing bugs caused if specialKeyBuffer is emptied
+    }
+
+    // ---------- PLAYING ----------
+    else if (!state.paused && !menu.isShowingMenu) {
+      frames.gameTime += frames.dt;
+      frames.count++;
+
+      // player movement/actions/keys
+      this.handleGameKeys(
         state,
         frames,
         menu,
@@ -170,39 +190,29 @@ export class Game {
         player,
         enemies
       );
-    }
-    // ---------- HANDLE MENU ----------
-    else {
-      menu.update(controls, timestamp, state);
-      return; // prevents timing bugs caused if specialKeyBuffer is emptied
-    }
-
-    // ---------- PLAYING ----------
-    if (!state.paused) {
-      frames.gameTimestamp += frames.dt;
-      frames.count++;
-
-      // player movement/actions
-      player.update(controls, frames, world);
+      player.update(controls, frames, world, projectiles);
 
       // generates new entitites if appropiate
-      spawner.generate(frames, visibleArea, world, enemies);
+      spawner.generate(frames, visibleArea, world, player, enemies);
 
       // other entitites movement/actions/triggers
       enemies.forEach((enemy) => {
-        enemy.update(controls, frames, world, player);
+        enemy.update(controls, frames, world, projectiles, player);
+      });
+      projectiles.forEach((projectile) => {
+        projectile.update(controls, frames, world);
       });
 
-      // calculate ability
+      // remove destroyed entities
 
+      // calculate ability
       // calculate damage
       // player.calculateDamage() ?
-      // for (const projectile in projectiles) {}
       // for (const entity in staticEntities) {}
       // for (const entity in movingEntitites) {}
     }
 
-    controls.specialKeyBuffer = "";
+    // controls.specialKeyBuffer = "";
   }
 
   private draw(
@@ -216,7 +226,8 @@ export class Game {
     controls: Controls,
     world: World,
     player: Player,
-    enemies: Set<Enemy>
+    enemies: Set<Enemy>,
+    projectiles: Set<Projectile>
   ): void {
     // dynamic canvas resize
     canvas.height = window.innerHeight * constants.canvas.heightFraction;
@@ -247,24 +258,31 @@ export class Game {
     // world background and edge
     world.draw(canvas, ctx, visibleArea);
 
-    // static entitities
-
-    // moving entitites
-
-    // let i = 0;
+    // enemies
     enemies.forEach((enemy) => {
       enemy.draw(canvas, ctx, world, player);
-      // if (enemy.isVisible(visibleArea)) {
-      //   i++;
-      // }
     });
-    // console.log("visible:", i);
-
-    // console.log(enemies);
-    // cancelAnimationFrame(this.animationFrameRequestId);
 
     // player
     player.draw(canvas, ctx);
+    // PLACEHOLDER: player aim
+    ctx.save();
+    ctx.fillStyle = "red";
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(Math.atan2(controls.aim.y, controls.aim.x));
+    ctx.translate(-canvas.width / 2, -canvas.height / 2);
+    ctx.fillRect(
+      canvas.width / 2,
+      canvas.height / 2 - player.height / 4,
+      player.height * 2,
+      player.height / 2
+    );
+    ctx.restore();
+
+    // other entities
+    projectiles.forEach((projectile) => {
+      projectile.draw(canvas, ctx, world, player);
+    });
 
     // HUD
     hud.draw(canvas, ctx, state, player);
@@ -275,8 +293,7 @@ export class Game {
     }
   }
 
-  private handleSpecialKeys(
-    timestamp: DOMHighResTimeStamp,
+  private handleGameKeys(
     state: GameState,
     frames: GameFrames,
     menu: Menu,
@@ -285,59 +302,75 @@ export class Game {
     player: Player,
     enemies: Set<Enemy>
   ) {
-    // console.log(controls.specialKeyBuffer);
-    if (controls.specialKeyBuffer === ControlsKeys.v) {
+    // ---------- exclusive events (restart/open menu/etc) ----------
+    if (controls.keys.restart) {
       this.restart();
+      return;
     }
-    // change speed (time factor)
-    else if (controls.specialKeyBuffer === ControlsKeys.z) {
-      state.timeSpeedCustom =
-        state.timeSpeedCustom > 1 ? 0.5 : state.timeSpeedCustom < 1 ? 1.0 : 3.0;
-    }
-    // select next ability
-    else if (!state.paused && controls.specialKeyBuffer === ControlsKeys.f) {
-      player.selectNextAbility();
-    }
-    // use ability
-    else if (
-      !state.paused &&
-      controls.specialKeyBuffer === ControlsKeys.space
-    ) {
-      player.useAbility(frames, world, enemies);
-    }
-    // open level up screen
-    else if (false) {
-      // state.paused = true
-      // state.isShowingLevelUp = true
-    }
+
     // open menu or close level up screen
     else if (
-      controls.specialKeyBuffer === ControlsKeys.esc &&
+      controls.keys.esc &&
       !menu.isShowingMenu &&
-      !menu.isCoolingDown(timestamp)
+      !menu.isCoolingDown(frames.realTime)
     ) {
       // open menu & pause
       if (state.hasStarted) {
         state.paused = true;
         menu.isShowingMenu = true;
-        controls.specialKeyBuffer = "";
-        // close level up & resume
-      } else if (false) {
-        // state.paused = false
-        // state.isShowingLevelUp = false
       }
+      // // close level up & resume
+      // else if (state.isLevelingUp) {
+      //   state.paused = false;
+      //   state.isShowingLevelUp = false;
+      // }
+      controls.keys.esc = false;
     }
+    // // open level up screen
+    // else if (controls.keys.levelUp) {
+    //   state.paused = true
+    //   state.isShowingLevelUp = true
+    // }
+
     // cancel loop, for debugging
-    else if (controls.specialKeyBuffer === ControlsKeys.zero) {
+    else if (controls.keys.cancelGameLoop) {
       this.cancelLoop();
       console.log("world", this.world);
       console.log("player", this.player);
       console.table(this.enemies);
+      // console.table(this.projectiles);
+      console.log("projectiles remaining:", this.projectiles.size);
+      controls.keys.cancelGameLoop = false;
     }
-    // show enemies, for debugging
-    else if (controls.specialKeyBuffer === ControlsKeys.one) {
+    // log enemies, for debugging
+    else if (controls.keys.logEnemies) {
       console.log(this.enemies);
+      controls.keys.logEnemies = false;
     }
-    controls.specialKeyBuffer = "";
+
+    // ---------- other non-movement keys ----------
+    // change custom timespeed factor
+    if (controls.keys.timeSpeed) {
+      state.timeSpeedCustom =
+        state.timeSpeedCustom > 1 ? 0.5 : state.timeSpeedCustom < 1 ? 1.0 : 3.0;
+      controls.keys.timeSpeed = false;
+    }
+
+    // select next ability
+    if (controls.keys.nextAbility) {
+      player.selectNextAbility();
+      controls.keys.nextAbility = false;
+    }
+    // use ability
+    else if (controls.keys.space) {
+      player.useAbility(frames, world, enemies);
+      controls.keys.space = false;
+    }
+
+    if (controls.keys.reload) {
+      player.weapon?.startReload(frames.gameTime);
+      // SOUND: select sound effect based on return value
+      controls.keys.reload = false;
+    }
   }
 }

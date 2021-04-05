@@ -1,6 +1,6 @@
+import { style } from "./data/style";
 import { GameState } from "./game";
 import { Player } from "./player";
-import { style } from "./style";
 
 export class HUD {
   draw(
@@ -47,6 +47,39 @@ export class HUD {
     );
 
     // weapon
+    ctx.fillStyle = style.hudColor.weaponBg;
+    ctx.globalAlpha = style.hud.alpha;
+    ctx.fillRect(
+      canvas.width * 0.8,
+      canvas.height * 0.8,
+      canvas.width * 0.15,
+      canvas.height * 0.08
+    );
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = style.hudColor.weapon;
+    ctx.font = style.canvasFonts.hud;
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "center";
+    ctx.fillText(
+      `${player.weapon?.variant}`,
+      canvas.width * 0.875,
+      canvas.height * 0.82
+    );
+    ctx.textAlign = "start";
+    ctx.fillText(
+      `${
+        player.weapon?.isReloading
+          ? "reloading"
+          : `${player.weapon?.magazine} / ${player.weapon?.magazineMax}`
+      }`,
+      canvas.width * 0.82,
+      canvas.height * 0.85
+    );
+    ctx.fillText(
+      `${player.weapon?.ammo}`,
+      canvas.width * 0.9,
+      canvas.height * 0.85
+    );
 
     //ability?
     ctx.fillStyle = style.hudColor.ability;
