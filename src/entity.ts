@@ -103,8 +103,11 @@ export class MovingEntity extends Entity {
     player: Player
   ) {
     // default direction == player.position
-    const direction = Vector.directionToTarget(this.position, player.position);
-    this.move(direction, frames, world);
+    const moveDirection = Vector.directionToTarget(
+      this.position,
+      player.position
+    );
+    this.move(moveDirection, frames, world);
     // PLACEHOLDER: interact with other objects
   }
 

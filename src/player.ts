@@ -68,16 +68,11 @@ export class Player extends MovingEntity {
     world: World,
     projectiles: Set<Projectile>
   ) {
-    const direction = this.getDirection(controls);
-    this.move(direction, frames, world);
+    const moveDirection = this.getMoveDirection(controls);
+    this.move(moveDirection, frames, world);
 
     // check if reload is done
-    if (
-      this.weapon?.isReloading &&
-      this.weapon?.isReloadDone(frames.gameTime)
-    ) {
-      this.weapon.finishReload();
-    }
+    this.weapon?.checkReload(frames.gameTime);
 
     if (controls.keys.mouse1) {
       this.attack(
@@ -134,7 +129,7 @@ export class Player extends MovingEntity {
     }
   }
 
-  private getDirection(controls: Controls) {
+  private getMoveDirection(controls: Controls) {
     let direction = new Vector();
 
     // direction

@@ -38,21 +38,20 @@ export class Enemy extends MovingEntity {
     player: Player
   ) {
     // default direction == player.position
-    const direction = Vector.directionToTarget(this.position, player.position);
-    this.move(direction, frames, world);
+    const moveDirection = Vector.directionToTarget(
+      this.position,
+      player.position
+    );
+    this.move(moveDirection, frames, world);
+
+    // check if reload is done
+    this.weapon?.checkReload(frames.gameTime);
 
     // default target: player
     const aimDirection = Vector.directionToTarget(
       this.position,
       player.position
     );
-    // check if reload is done
-    if (
-      this.weapon?.isReloading &&
-      this.weapon?.isReloadDone(frames.gameTime)
-    ) {
-      this.weapon.finishReload();
-    }
 
     // decide when to attack?
     if (true) {

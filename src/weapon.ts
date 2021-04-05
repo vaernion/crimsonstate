@@ -80,4 +80,10 @@ export class Weapon implements WeaponVariant {
   public isReloadDone(gameTime: number) {
     return this.reloadStartedTime + this.reloadTime <= gameTime;
   }
+
+  public checkReload(gameTime: number) {
+    if (this.isReloading && this.isReloadDone(gameTime)) {
+      this.finishReload();
+    }
+  }
 }
