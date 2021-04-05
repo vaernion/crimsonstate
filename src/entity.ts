@@ -71,8 +71,6 @@ export class Entity {
     world: World,
     player: Player
   ) {
-    ctx.fillStyle = style.entityColor.default;
-
     const visibleArea = world.visibleArea(canvas, player);
     if (this.isVisible(visibleArea)) {
       ctx.fillStyle = this.color || style.entityColor.default;
