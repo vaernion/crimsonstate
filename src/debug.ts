@@ -31,9 +31,9 @@ export class Debug {
       controls.keys.down ? "s" : ""
     }${controls.keys.right ? "d" : ""} ${controls.keys.mouse1 ? "m1" : ""}
     $state ${state.hasStarted ? "started" : ""} ${state.paused ? "paused" : ""}
-    $frame ${frames.count} fps ${(
-      (1000 / frames.dt) *
-      state.timeSpeed()
+    $frame ${frames.realFrames} fps ${(
+      1000 /
+      (frames.realTime / frames.realFrames)
     ).toFixed(1)}
     ${
       this.showTimestamps

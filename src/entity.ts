@@ -68,6 +68,7 @@ export class Entity {
   public draw(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
+    frames: GameFrames,
     world: World,
     player: Player
   ) {
@@ -105,19 +106,42 @@ export class MovingEntity extends Entity {
       this.position,
       player.position
     );
-    this.move(moveDirection, frames, world);
+    this.move(moveDirection, world);
     // PLACEHOLDER: interact with other objects
   }
 
-  public move(direction: Vector, frames: GameFrames, world: World) {
-    this.calculatePosition(direction, frames);
+  public draw(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    frames: GameFrames,
+    world: World,
+    player: Player
+  ) {
+    const visibleArea = world.visibleArea(canvas, player);
+    if (this.isVisible(visibleArea)) {
+      ctx.fillStyle = this.color || style.entityColor.default;
+      ctx.fillRect(
+        this.position.x -
+          visibleArea.xStart -
+          this.width / 2 +
+          this.velocity.x * frames.lagFraction,
+        this.position.y -
+          visibleArea.yStart -
+          this.height / 2 +
+          this.velocity.y * frames.lagFraction,
+        this.width,
+        this.height
+      );
+    }
+  }
+
+  public move(direction: Vector, world: World) {
+    this.calculatePosition(direction);
     this.fixEntityCollision();
     this.fixEdgeCollision(world);
   }
 
-  public calculatePosition(direction: Vector, frames: GameFrames) {
-    const dtFactor = frames.dt / frames.dtFixed;
-
+  public calculatePosition(direction: Vector) {
     // accelerate
     this.velocity.x += this.acceleration.x * direction.x;
     this.velocity.y += this.acceleration.y * direction.y;
@@ -132,8 +156,8 @@ export class MovingEntity extends Entity {
       this.velocity.y *= this.maxSpeed;
     }
 
-    this.position.x += this.velocity.x * dtFactor;
-    this.position.y += this.velocity.y * dtFactor;
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
   }
 
   public fixEntityCollision() {}

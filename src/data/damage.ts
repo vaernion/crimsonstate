@@ -54,6 +54,8 @@ export interface ProjectileVariant {
   acceleration: number;
   maxSpeed: number;
   damageVariant: DamageVariant;
+  width: number;
+  height: number;
 }
 
 export const projectileVariants: Record<ProjectileName, ProjectileVariant> = {
@@ -63,6 +65,8 @@ export const projectileVariants: Record<ProjectileName, ProjectileVariant> = {
     acceleration: 7,
     maxSpeed: 7,
     damageVariant: damageVariants.normal,
+    width: 2,
+    height: 3,
   },
   rifle: {
     variant: "rifle",
@@ -70,6 +74,8 @@ export const projectileVariants: Record<ProjectileName, ProjectileVariant> = {
     acceleration: 10,
     maxSpeed: 10,
     damageVariant: damageVariants.penetrating,
+    width: 3,
+    height: 7,
   },
   slugshot: {
     variant: "slugshot",
@@ -77,6 +83,8 @@ export const projectileVariants: Record<ProjectileName, ProjectileVariant> = {
     acceleration: 5,
     maxSpeed: 5,
     damageVariant: damageVariants.impact,
+    width: 6,
+    height: 6,
   },
   rocket: {
     variant: "rocket",
@@ -84,6 +92,8 @@ export const projectileVariants: Record<ProjectileName, ProjectileVariant> = {
     acceleration: 1.5,
     maxSpeed: 12,
     damageVariant: damageVariants.explosive,
+    width: 8,
+    height: 12,
   },
   laser: {
     variant: "laser",
@@ -91,5 +101,7 @@ export const projectileVariants: Record<ProjectileName, ProjectileVariant> = {
     acceleration: 99,
     maxSpeed: 99,
     damageVariant: damageVariants.elemental,
+    width: 1,
+    height: 1,
   },
 };

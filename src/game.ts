@@ -17,12 +17,13 @@ export class GameState {
   public timeSpeed = () => this.timeSpeedWorld * this.timeSpeedCustom;
 }
 export class GameFrames {
-  public count: number = 0; // total number of frames
+  public realFrames: number = 0; // total number of frames rendered
+  public gameFrames: number = 0; // total number of frames simulated
   public realTime: number = 0; // real world
   public gameTime: number = 0; // ingame time
-  public dt: number = 0; // ms
-  public dtFixed: number = 1000 / 60; // 16.67ms 60fps
+  public dt: number = 1000 / 60; // 16.67ms (60fps) per logic update
   public lag: number = 0; // accumulated dt
+  public lagFraction: number = 0; // 0-0.99 into next frame
 }
 
 export class Game {
@@ -74,9 +75,13 @@ export class Game {
   }
 
   private restart() {
+    const previousRealTime = this.frames.realTime;
+    const previousRealFrames = this.frames.realFrames;
     this.debug = new Debug();
     this.state = new GameState();
     this.frames = new GameFrames();
+    this.frames.realTime = previousRealTime;
+    this.frames.realFrames = previousRealFrames;
     this.menu = new Menu();
     this.hud = new HUD();
     this.world = new World(this.world.width, this.world.height);
@@ -151,68 +156,72 @@ export class Game {
     // update delta time each update
     // syncs game time to actual time passed * time speed
     // and ensures game doesn't progress while paused
-    frames.dt = (timestamp - frames.realTime) * state.timeSpeed();
+    if (!state.paused) {
+      frames.lag += (timestamp - frames.realTime) * state.timeSpeed();
+    }
+    if (frames.lag > 1000) {
+      frames.lag = frames.dt; // skip game updates if too much time passes
+    }
     frames.realTime = timestamp;
+    frames.realFrames++;
 
     const visibleArea = world.visibleArea(this.canvas, player);
-
-    // // ---------- PAUSE ----------
-    // can buffer key activations during pause
-    // seems to not cause issues, otherwise should reset controls.keys
-    if (controls.keys.pause && !menu.isShowingMenu) {
-      this.togglePause();
-      this.controls.keys.pause = false;
-    }
 
     // ---------- START ----------
     if (menu.isStartingGame) {
       this.start();
     }
 
+    // ---------- HANDLE MISC KEYS ----------
+    this.handleMiscKeys(state, frames, menu, controls);
+
     // ---------- HANDLE MENU ----------
     if (state.paused && menu.isShowingMenu) {
       menu.update(controls, frames, state);
-      return; // prevents timing bugs caused if specialKeyBuffer is emptied
+      return;
     }
 
     // ---------- PLAYING ----------
-    else if (!state.paused && !menu.isShowingMenu) {
-      frames.gameTime += frames.dt;
-      frames.count++;
+    if (!state.paused && !menu.isShowingMenu) {
+      // catch game logic up to render speed (fixed time step, variable rendering)
+      while (frames.lag >= frames.dt) {
+        frames.gameTime += frames.dt;
+        frames.gameFrames++;
+        frames.lag -= frames.dt;
 
-      // player movement/actions/keys
-      this.handleGameKeys(
-        state,
-        frames,
-        menu,
-        controls,
-        world,
-        player,
-        enemies
-      );
-      player.update(controls, frames, world, projectiles);
+        // player movement/actions/keys
+        this.handleGameKeys(
+          state,
+          frames,
+          menu,
+          controls,
+          world,
+          player,
+          enemies
+        );
+        player.update(controls, frames, world, projectiles);
 
-      // generates new entitites if appropiate
-      spawner.generate(frames, visibleArea, world, player, enemies);
+        // generates new entitites if appropiate
+        spawner.generate(frames, visibleArea, world, player, enemies);
 
-      // other entitites movement/actions/triggers
-      enemies.forEach((enemy) => {
-        enemy.update(controls, frames, world, projectiles, player);
-      });
-      projectiles.forEach((projectile) => {
-        projectile.update(controls, frames, world);
-      });
+        // other entitites movement/actions/triggers
+        enemies.forEach((enemy) => {
+          enemy.update(controls, frames, world, projectiles, player);
+        });
+        projectiles.forEach((projectile) => {
+          projectile.update(controls, frames, world);
+        });
 
-      // remove destroyed entities
+        // remove destroyed entities
 
-      // calculate ability
-      // calculate damage
-      // player.calculateDamage() ?
-      // for (const entity in staticEntities) {}
-      // for (const entity in movingEntitites) {}
+        // calculate ability
+        // calculate damage
+        // player.calculateDamage() ?
+        // for (const entity in staticEntities) {}
+        // for (const entity in movingEntitites) {}
+      }
+      this.frames.lagFraction = this.frames.lag / this.frames.dt;
     }
-
-    // controls.specialKeyBuffer = "";
   }
 
   private draw(
@@ -260,11 +269,11 @@ export class Game {
 
     // enemies
     enemies.forEach((enemy) => {
-      enemy.draw(canvas, ctx, world, player);
+      enemy.draw(canvas, ctx, frames, world, player);
     });
 
     // player
-    player.draw(canvas, ctx);
+    player.draw(canvas, ctx, frames);
     // PLACEHOLDER: player aim
     ctx.save();
     ctx.fillStyle = "red";
@@ -281,7 +290,7 @@ export class Game {
 
     // other entities
     projectiles.forEach((projectile) => {
-      projectile.draw(canvas, ctx, world, player);
+      projectile.draw(canvas, ctx, frames, world, player);
     });
 
     // HUD
@@ -302,14 +311,53 @@ export class Game {
     player: Player,
     enemies: Set<Enemy>
   ) {
-    // ---------- exclusive events (restart/open menu/etc) ----------
+    // select next ability
+    if (controls.keys.nextAbility) {
+      player.selectNextAbility();
+      controls.keys.nextAbility = false;
+    }
+    // use ability
+    else if (controls.keys.space) {
+      player.useAbility(frames, world, enemies);
+      controls.keys.space = false;
+    }
+    // reload
+    if (controls.keys.reload) {
+      player.weapon?.startReload(frames.gameTime);
+      // SOUND: select sound effect based on return value and weapon
+      controls.keys.reload = false;
+    }
+  }
+
+  private handleMiscKeys(
+    state: GameState,
+    frames: GameFrames,
+    menu: Menu,
+    controls: Controls
+  ) {
+    // // ---------- PAUSE ----------
+    // can buffer key activations during pause
+    // seems to not cause issues, otherwise should reset controls.keys
+    if (controls.keys.pause && !menu.isShowingMenu) {
+      this.togglePause();
+      this.controls.keys.pause = false;
+    }
+
+    // ---------- RESTART ----------
     if (controls.keys.restart) {
       this.restart();
       return;
     }
 
+    // change custom timespeed factor
+    if (controls.keys.timeSpeed) {
+      state.timeSpeedCustom =
+        state.timeSpeedCustom > 1 ? 0.5 : state.timeSpeedCustom < 1 ? 1.0 : 3.0;
+      controls.keys.timeSpeed = false;
+    }
+
     // open menu or close level up screen
-    else if (
+    if (
       controls.keys.esc &&
       !menu.isShowingMenu &&
       !menu.isCoolingDown(frames.realTime)
@@ -335,6 +383,7 @@ export class Game {
     // cancel loop, for debugging
     else if (controls.keys.cancelGameLoop) {
       this.cancelLoop();
+      console.log("frames", this.frames);
       console.log("world", this.world);
       console.log("player", this.player);
       console.table(this.enemies);
@@ -346,31 +395,6 @@ export class Game {
     else if (controls.keys.logEnemies) {
       console.log(this.enemies);
       controls.keys.logEnemies = false;
-    }
-
-    // ---------- other non-movement keys ----------
-    // change custom timespeed factor
-    if (controls.keys.timeSpeed) {
-      state.timeSpeedCustom =
-        state.timeSpeedCustom > 1 ? 0.5 : state.timeSpeedCustom < 1 ? 1.0 : 3.0;
-      controls.keys.timeSpeed = false;
-    }
-
-    // select next ability
-    if (controls.keys.nextAbility) {
-      player.selectNextAbility();
-      controls.keys.nextAbility = false;
-    }
-    // use ability
-    else if (controls.keys.space) {
-      player.useAbility(frames, world, enemies);
-      controls.keys.space = false;
-    }
-
-    if (controls.keys.reload) {
-      player.weapon?.startReload(frames.gameTime);
-      // SOUND: select sound effect based on return value
-      controls.keys.reload = false;
     }
   }
 }

@@ -69,7 +69,7 @@ export class Player extends MovingEntity {
     projectiles: Set<Projectile>
   ) {
     const moveDirection = this.getMoveDirection(controls);
-    this.move(moveDirection, frames, world);
+    this.move(moveDirection, world);
 
     // check if reload is done
     this.weapon?.checkReload(frames.gameTime);
@@ -85,7 +85,11 @@ export class Player extends MovingEntity {
     }
   }
 
-  public draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+  public draw(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    frames: GameFrames
+  ) {
     ctx.fillStyle = style.playerColor.fill;
     ctx.fillRect(
       // divide by 2 to keep x and y in center of player sprite

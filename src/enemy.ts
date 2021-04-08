@@ -42,7 +42,7 @@ export class Enemy extends MovingEntity {
       this.position,
       player.position
     );
-    this.move(moveDirection, frames, world);
+    this.move(moveDirection, world);
 
     // check if reload is done
     this.weapon?.checkReload(frames.gameTime);

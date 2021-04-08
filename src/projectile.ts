@@ -41,8 +41,6 @@ export class Projectile extends MovingEntity {
       projectileVariant.acceleration,
       projectileVariant.acceleration
     );
-    this.width = 2;
-    this.height = 2;
 
     this.variant = projectileVariant.variant;
     this.projectileType = projectileVariant.projectileType;
@@ -50,10 +48,12 @@ export class Projectile extends MovingEntity {
     this.damageVariant = projectileVariant.damageVariant;
     this.damage = damage;
     this.penetration = penetration;
+    this.width = projectileVariant.width;
+    this.height = projectileVariant.height;
   }
 
   public update(controls: Controls, frames: GameFrames, world: World) {
-    this.move(this.direction, frames, world);
+    this.move(this.direction, world);
     // PLACEHOLDER: interact with other objects
   }
 }
