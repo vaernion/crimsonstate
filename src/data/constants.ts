@@ -35,7 +35,7 @@ export const constants = {
     },
   },
   enemy: {
-    maxCount: 2,
+    maxCount: 10,
     spawnDelay: 2000,
     spawnGroup: 15,
   },

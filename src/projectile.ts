@@ -16,6 +16,8 @@ export class Projectile extends Entity {
   public spawnedBy: string;
 
   public direction: Vector;
+  public startPosition: Vector;
+  public maxRange: number;
 
   public damageVariant: DamageVariant;
   public damage: number;
@@ -36,6 +38,7 @@ export class Projectile extends Entity {
 
     this.position = position;
     this.direction = direction;
+    this.startPosition = new Vector(this.position.x, this.position.y);
     this.acceleration = new Vector(
       projectileVariant.acceleration,
       projectileVariant.acceleration
@@ -44,6 +47,7 @@ export class Projectile extends Entity {
     this.variant = projectileVariant.variant;
     this.projectileType = projectileVariant.projectileType;
     this.maxSpeed = projectileVariant.maxSpeed;
+    this.maxRange = projectileVariant.maxRange;
     this.damageVariant = projectileVariant.damageVariant;
     this.damage = damage;
     this.penetration = penetration;

@@ -19,6 +19,10 @@ export class Vector {
     return normalized;
   }
 
+  public distance(target: Vector): number {
+    return Math.sqrt((this.x - target.x) ** 2 + (this.y - target.y) ** 2);
+  }
+
   static directionToTarget(source: Vector, target: Vector): Vector {
     let distance = new Vector(target.x - source.x, target.y - source.y);
     let direction = distance.normalize();
@@ -111,7 +115,9 @@ export class Entity {
   public move(direction: Vector, world: World) {
     this.calculatePosition(direction);
     this.fixEntityCollision();
-    this.fixEdgeCollision(world);
+    const collidedWithEdge = this.fixEdgeCollision(world);
+    if (collidedWithEdge && this.type === EntityType.projectile)
+      this.isDestroyed = true;
   }
 
   public calculatePosition(direction: Vector) {
@@ -135,26 +141,32 @@ export class Entity {
 
   public fixEntityCollision() {}
 
-  public fixEdgeCollision(world: World) {
+  public fixEdgeCollision(world: World): boolean {
+    let collided = false;
     // left edge
     if (this.position.x - this.width / 2 <= 0) {
       this.position.x = this.width / 2;
       this.velocity.x = 0;
+      collided = true;
     }
     // top edge
     if (this.position.y - this.height / 2 <= 0) {
       this.position.y = this.height / 2;
       this.velocity.y = 0;
+      collided = true;
     }
     // right edge
     if (this.position.x + this.width / 2 >= world.width) {
       this.position.x = world.width - this.width / 2;
       this.velocity.x = 0;
+      collided = true;
     }
     // bottom edge
     if (this.position.y + this.height / 2 >= world.height) {
       this.position.y = world.height - this.height / 2;
       this.velocity.y = 0;
+      collided = true;
     }
+    return collided;
   }
 }

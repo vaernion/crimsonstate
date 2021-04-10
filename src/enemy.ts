@@ -52,7 +52,7 @@ export class Enemy extends Entity {
     );
 
     // decide when to attack?
-    if (Math.random() > 0.3) {
+    if (Math.random() < 0.1) {
       this.weapon?.shoot(frames.gameTime, projectiles, this, aimDirection);
     }
   }

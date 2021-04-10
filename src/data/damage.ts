@@ -53,6 +53,7 @@ export interface ProjectileVariant {
   projectileType: ProjectileType;
   acceleration: number;
   maxSpeed: number;
+  maxRange: number;
   damageVariant: DamageVariant;
   width: number;
   height: number;
@@ -64,6 +65,7 @@ export const projectileVariants: Record<ProjectileName, ProjectileVariant> = {
     projectileType: ProjectileType.bullet,
     acceleration: 8,
     maxSpeed: 8,
+    maxRange: 600,
     damageVariant: damageVariants.normal,
     width: 2,
     height: 3,
@@ -73,6 +75,7 @@ export const projectileVariants: Record<ProjectileName, ProjectileVariant> = {
     projectileType: ProjectileType.bullet,
     acceleration: 11,
     maxSpeed: 11,
+    maxRange: 800,
     damageVariant: damageVariants.penetrating,
     width: 3,
     height: 7,
@@ -82,6 +85,7 @@ export const projectileVariants: Record<ProjectileName, ProjectileVariant> = {
     projectileType: ProjectileType.bullet,
     acceleration: 7,
     maxSpeed: 7,
+    maxRange: 300,
     damageVariant: damageVariants.impact,
     width: 6,
     height: 6,
@@ -91,6 +95,7 @@ export const projectileVariants: Record<ProjectileName, ProjectileVariant> = {
     projectileType: ProjectileType.rocket,
     acceleration: 1.2,
     maxSpeed: 9,
+    maxRange: 1200,
     damageVariant: damageVariants.explosive,
     width: 8,
     height: 12,
@@ -100,6 +105,7 @@ export const projectileVariants: Record<ProjectileName, ProjectileVariant> = {
     projectileType: ProjectileType.laser,
     acceleration: 99,
     maxSpeed: 99,
+    maxRange: 1000,
     damageVariant: damageVariants.elemental,
     width: 1,
     height: 1,

@@ -216,7 +216,18 @@ export class Game {
           projectile.update(controls, frames, world);
         });
 
-        // remove destroyed entities
+        // remove projectiles that are destroyed (collided) or traveled max range
+        projectiles.forEach((projectile) => {
+          if (
+            projectile.isDestroyed ||
+            projectile.startPosition.distance(projectile.position) >
+              projectile.maxRange
+          ) {
+            projectiles.delete(projectile);
+          }
+        });
+
+        // remove other destroyed entities
 
         // calculate ability
         // calculate damage

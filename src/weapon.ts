@@ -21,7 +21,7 @@ export class Weapon implements WeaponVariant {
   penetration: number;
   spread: number;
 
-  constructor(weaponName: WeaponName, ammoFraction: number) {
+  constructor(weaponName: WeaponName, ammoFraction: number = 1) {
     const weaponVariant = weaponVariants[weaponName];
     this.variant = weaponVariant.variant;
     this.projectileVariant = weaponVariant.projectileVariant;
