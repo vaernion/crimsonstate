@@ -4,16 +4,15 @@ import {
   ProjectileType,
   ProjectileVariant,
 } from "./data/damage";
-import { EntityType } from "./data/entities";
-import { MovingEntity, Vector } from "./entity";
+import { EntityFaction, EntityType } from "./data/entities";
+import { Entity, Vector } from "./entity";
 import { GameFrames } from "./game";
 import { World } from "./world";
 
-export class Projectile extends MovingEntity {
+export class Projectile extends Entity {
   public type = EntityType.projectile;
   public variant: string;
   public projectileType: ProjectileType;
-  public faction: EntityType;
   public spawnedBy: string;
 
   public direction: Vector;
@@ -23,7 +22,7 @@ export class Projectile extends MovingEntity {
   public penetration: number;
 
   constructor(
-    faction: EntityType,
+    faction: EntityFaction,
     spawnedBy: string,
     position: Vector,
     direction: Vector,

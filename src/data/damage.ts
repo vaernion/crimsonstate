@@ -62,8 +62,8 @@ export const projectileVariants: Record<ProjectileName, ProjectileVariant> = {
   pistol: {
     variant: "pistol",
     projectileType: ProjectileType.bullet,
-    acceleration: 7,
-    maxSpeed: 7,
+    acceleration: 8,
+    maxSpeed: 8,
     damageVariant: damageVariants.normal,
     width: 2,
     height: 3,
@@ -71,8 +71,8 @@ export const projectileVariants: Record<ProjectileName, ProjectileVariant> = {
   rifle: {
     variant: "rifle",
     projectileType: ProjectileType.bullet,
-    acceleration: 10,
-    maxSpeed: 10,
+    acceleration: 11,
+    maxSpeed: 11,
     damageVariant: damageVariants.penetrating,
     width: 3,
     height: 7,
@@ -80,8 +80,8 @@ export const projectileVariants: Record<ProjectileName, ProjectileVariant> = {
   slugshot: {
     variant: "slugshot",
     projectileType: ProjectileType.bullet,
-    acceleration: 5,
-    maxSpeed: 5,
+    acceleration: 7,
+    maxSpeed: 7,
     damageVariant: damageVariants.impact,
     width: 6,
     height: 6,
@@ -89,8 +89,8 @@ export const projectileVariants: Record<ProjectileName, ProjectileVariant> = {
   rocket: {
     variant: "rocket",
     projectileType: ProjectileType.rocket,
-    acceleration: 1.5,
-    maxSpeed: 12,
+    acceleration: 1.2,
+    maxSpeed: 9,
     damageVariant: damageVariants.explosive,
     width: 8,
     height: 12,

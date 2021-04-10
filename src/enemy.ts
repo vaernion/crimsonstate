@@ -1,22 +1,19 @@
 import { Controls } from "./controls";
-import { EnemyVariant, EntityType } from "./data/entities";
-import { MovingEntity, Vector } from "./entity";
+import { EnemyVariant, EntityFaction, EntityType } from "./data/entities";
+import { Entity, Vector } from "./entity";
 import { GameFrames } from "./game";
 import { Player } from "./player";
 import { Projectile } from "./projectile";
 import { Weapon } from "./weapon";
 import { World } from "./world";
 
-export class Enemy extends MovingEntity {
-  public type = EntityType.enemy;
-
-  constructor(
-    enemyVariant: EnemyVariant,
-    name: string,
-    public position: Vector
-  ) {
+export class Enemy extends Entity {
+  constructor(enemyVariant: EnemyVariant, public position: Vector) {
     super();
-    this.name = "enemy_" + name;
+    this.type = EntityType.enemy;
+    this.faction = EntityFaction.enemy;
+    this.name = `enemy_${enemyVariant.variant}${this.id}`;
+
     this.acceleration = new Vector(
       enemyVariant.acceleration,
       enemyVariant.acceleration
@@ -24,10 +21,11 @@ export class Enemy extends MovingEntity {
     this.maxSpeed = enemyVariant.maxSpeed;
     this.width = enemyVariant.width;
     this.height = enemyVariant.height;
+    this.color = enemyVariant.color;
+
     this.health = enemyVariant.health;
     this.maxHealth = enemyVariant.health;
-    this.color = enemyVariant.color;
-    this.weapon = new Weapon(enemyVariant.weapon);
+    this.weapon = new Weapon(enemyVariant.weapon, 1);
   }
 
   public update(
@@ -54,29 +52,8 @@ export class Enemy extends MovingEntity {
     );
 
     // decide when to attack?
-    if (true) {
-      this.attack(controls, frames, world, projectiles, aimDirection);
-    }
-  }
-
-  public attack(
-    controls: Controls,
-    frames: GameFrames,
-    world: World,
-    projectiles: Set<Projectile>,
-    direction: Vector
-  ) {
-    if (this.weapon?.shoot(frames.gameTime)) {
-      const projectile = new Projectile(
-        this.type,
-        this.name,
-        new Vector(this.position.x, this.position.y),
-        direction,
-        this.weapon.projectileVariant,
-        this.weapon.damage,
-        this.weapon.penetration
-      );
-      projectiles.add(projectile);
+    if (Math.random() > 0.3) {
+      this.weapon?.shoot(frames.gameTime, projectiles, this, aimDirection);
     }
   }
 }

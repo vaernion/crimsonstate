@@ -107,6 +107,7 @@ export class Game {
   private loop(timestamp: DOMHighResTimeStamp): void {
     // cancelAnimationFrame() does not work if request is at end
     this.animationFrameRequestId = requestAnimationFrame(this.loop.bind(this));
+    // console.time("update");
     this.update(
       timestamp,
       this.frames,
@@ -119,6 +120,8 @@ export class Game {
       this.enemies,
       this.projectiles
     );
+    // console.timeEnd("update");
+    // console.time("draw");
     this.draw(
       this.canvas,
       this.ctx,
@@ -133,6 +136,7 @@ export class Game {
       this.enemies,
       this.projectiles
     );
+    // console.timeEnd("draw");
   }
 
   private update(

@@ -10,6 +10,13 @@ export enum EntityType {
   hazard = "hazard",
 }
 
+export enum EntityFaction {
+  neutral = "neutral",
+  player = "player",
+  enemy = "enemy",
+  chaos = "chaos", // hostile to all
+}
+
 export interface EnemyVariant {
   variant: string;
   maxSpeed: number;
@@ -25,8 +32,8 @@ export interface EnemyVariant {
 export const enemyVariants: { [k: string]: EnemyVariant } = {
   normal: {
     variant: "normal",
-    acceleration: 0.8,
-    maxSpeed: 9,
+    acceleration: 0.5,
+    maxSpeed: 3.5,
     width: 20,
     height: 20,
     health: 50,
@@ -36,8 +43,8 @@ export const enemyVariants: { [k: string]: EnemyVariant } = {
   },
   fast: {
     variant: "fast",
-    acceleration: 1.2,
-    maxSpeed: 11,
+    acceleration: 1.0,
+    maxSpeed: 4.5,
     width: 10,
     height: 10,
     health: 30,
@@ -48,7 +55,7 @@ export const enemyVariants: { [k: string]: EnemyVariant } = {
   slow: {
     variant: "slow",
     acceleration: 0.25,
-    maxSpeed: 7,
+    maxSpeed: 2.5,
     width: 30,
     height: 30,
     health: 200,

@@ -1,7 +1,7 @@
 import { constants } from "./data/constants";
 import { enemyVariants } from "./data/entities";
 import { Enemy } from "./enemy";
-import { Entity, Vector } from "./entity";
+import { Vector } from "./entity";
 import { GameFrames } from "./game";
 import { Player } from "./player";
 import { VisibleArea, World } from "./world";
@@ -47,9 +47,8 @@ export class Spawner {
         let enemyVariant = Object.values(enemyVariants)[
           Math.floor(Math.random() * Object.keys(enemyVariants).length)
         ];
-        let name = `${enemyVariant.variant}${Entity.nextId}`;
         let position = this.randomPosition(world);
-        let enemy = new Enemy(enemyVariant, name, position);
+        let enemy = new Enemy(enemyVariant, position);
 
         // force visible enemies outside visible range
         // MovingEntity.fixEdgeCollision() will ensure they remain in-bounds

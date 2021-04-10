@@ -6,8 +6,8 @@ export const constants = {
   },
   friction: 0.89,
   world: {
-    width: 2000,
-    height: 1000,
+    width: 1500,
+    height: 800,
   },
   player: {
     width: 20,
@@ -19,7 +19,7 @@ export const constants = {
       x: 1.3,
       y: 1.3,
     },
-    maxSpeed: 10,
+    maxSpeed: 4,
     consumables: {
       initial: {
         bomb: 3,
@@ -35,7 +35,7 @@ export const constants = {
     },
   },
   enemy: {
-    maxCount: 10,
+    maxCount: 2,
     spawnDelay: 2000,
     spawnGroup: 15,
   },

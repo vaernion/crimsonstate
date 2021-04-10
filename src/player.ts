@@ -1,10 +1,10 @@
 import { Controls } from "./controls";
 import { constants } from "./data/constants";
-import { EntityType } from "./data/entities";
+import { EntityFaction, EntityType } from "./data/entities";
 import { style } from "./data/style";
 import { WeaponName } from "./data/weapons";
 import { Enemy } from "./enemy";
-import { MovingEntity, Vector } from "./entity";
+import { Entity, Vector } from "./entity";
 import { GameFrames } from "./game";
 import { Projectile } from "./projectile";
 import { Weapon } from "./weapon";
@@ -38,13 +38,14 @@ class Consumables {
   }
 }
 
-export class Player extends MovingEntity {
+export class Player extends Entity {
   public consumables = new Consumables();
   private headSize = constants.player.headSize; // placeholder until proper images
-  public type = EntityType.player;
 
   constructor(world: World, health: number, maxHealth: number) {
     super();
+    this.type = EntityType.player;
+    this.faction = EntityFaction.player;
     this.name = "player";
 
     this.position.x = world.width / 2;
@@ -53,13 +54,13 @@ export class Player extends MovingEntity {
       constants.player.acceleration.x,
       constants.player.acceleration.y
     );
-
     this.maxSpeed = constants.player.maxSpeed;
-    this.health = health;
-    this.maxHealth = maxHealth;
     this.width = constants.player.width;
     this.height = constants.player.height;
-    this.weapon = new Weapon(WeaponName.m4);
+
+    this.health = health;
+    this.maxHealth = maxHealth;
+    this.weapon = new Weapon(WeaponName.hk45, 0.5);
   }
 
   public update(
@@ -75,11 +76,10 @@ export class Player extends MovingEntity {
     this.weapon?.checkReload(frames.gameTime);
 
     if (controls.keys.mouse1) {
-      this.attack(
-        controls,
-        frames,
-        world,
+      this.weapon?.shoot(
+        frames.gameTime,
         projectiles,
+        this,
         controls.aim.normalize()
       );
     }
@@ -110,27 +110,6 @@ export class Player extends MovingEntity {
       2 * Math.PI
     );
     ctx.stroke();
-  }
-
-  public attack(
-    controls: Controls,
-    frames: GameFrames,
-    world: World,
-    projectiles: Set<Projectile>,
-    direction: Vector
-  ) {
-    if (this.weapon?.shoot(frames.gameTime)) {
-      const projectile = new Projectile(
-        this.type,
-        this.name,
-        new Vector(this.position.x, this.position.y),
-        direction,
-        this.weapon.projectileVariant,
-        this.weapon.damage,
-        this.weapon.penetration
-      );
-      projectiles.add(projectile);
-    }
   }
 
   private getMoveDirection(controls: Controls) {

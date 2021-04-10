@@ -1,6 +1,6 @@
 import { Controls } from "./controls";
 import { constants } from "./data/constants";
-import { EntityType } from "./data/entities";
+import { EntityFaction, EntityType } from "./data/entities";
 import { style } from "./data/style";
 import { GameFrames } from "./game";
 import { Player } from "./player";
@@ -11,7 +11,7 @@ import { VisibleArea, World } from "./world";
 export class Vector {
   constructor(public x: number = 0, public y: number = 0) {}
 
-  public normalize() {
+  public normalize(): Vector {
     const magnitude = Math.sqrt(this.x ** 2 + this.y ** 2);
     const normalized = new Vector(this.x, this.y);
     if (magnitude) normalized.x /= magnitude;
@@ -19,7 +19,7 @@ export class Vector {
     return normalized;
   }
 
-  static directionToTarget(source: Vector, target: Vector) {
+  static directionToTarget(source: Vector, target: Vector): Vector {
     let distance = new Vector(target.x - source.x, target.y - source.y);
     let direction = distance.normalize();
     return direction;
@@ -30,19 +30,29 @@ export class Entity {
   static nextId = 0;
   public id: number;
   public type: EntityType = EntityType.default;
+  public faction: EntityFaction = EntityFaction.neutral;
   public name: string = "";
+
   public position = new Vector();
+  public velocity: Vector = new Vector();
+  public acceleration: Vector = new Vector(0, 0);
+  public maxSpeed: number = 0;
   public width: number = 0;
   public height: number = 0;
+  public color: string = "";
+
   public health: number = 0;
   public maxHealth: number = 0;
-  public isDestroyed: boolean = false;
+  public isDestroyed: boolean = false; // used by cleanup/entity removal task
   public isInvincible: boolean = false;
-  public color: string = "";
   public weapon?: Weapon;
 
   constructor() {
-    this.id = ++Entity.nextId;
+    this.id = Entity.nextId++;
+  }
+
+  public speed() {
+    return Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
   }
 
   public isVisible(visibleArea: VisibleArea) {
@@ -61,53 +71,16 @@ export class Entity {
     projectiles: Set<Projectile>,
     player: Player
   ) {
-    // damage nearby stuff if hazard
-    // destroy self if certain conditions met (timer?)
-  }
-
-  public draw(
-    canvas: HTMLCanvasElement,
-    ctx: CanvasRenderingContext2D,
-    frames: GameFrames,
-    world: World,
-    player: Player
-  ) {
-    const visibleArea = world.visibleArea(canvas, player);
-    if (this.isVisible(visibleArea)) {
-      ctx.fillStyle = this.color || style.entityColor.default;
-      ctx.fillRect(
-        this.position.x - visibleArea.xStart - this.width / 2,
-        this.position.y - visibleArea.yStart - this.height / 2,
-        this.width,
-        this.height
-      );
-    }
-  }
-}
-
-export class MovingEntity extends Entity {
-  public velocity: Vector = new Vector();
-  public acceleration: Vector = new Vector(1, 1);
-  public maxSpeed: number = 1;
-
-  public speed() {
-    return Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
-  }
-
-  public update(
-    controls: Controls,
-    frames: GameFrames,
-    world: World,
-    projectiles: Set<Projectile>,
-    player: Player
-  ) {
     // default direction == player.position
     const moveDirection = Vector.directionToTarget(
       this.position,
       player.position
     );
     this.move(moveDirection, world);
+
     // PLACEHOLDER: interact with other objects
+    // damage nearby stuff if hazard
+    // destroy self if certain conditions met (timer?)
   }
 
   public draw(
