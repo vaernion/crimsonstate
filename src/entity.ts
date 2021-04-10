@@ -20,7 +20,18 @@ export class Vector {
   }
 
   public distance(target: Vector): number {
-    return Math.sqrt((this.x - target.x) ** 2 + (this.y - target.y) ** 2);
+    return Math.hypot(this.x - target.x, this.y - target.y);
+  }
+
+  /**
+   * https://gamedev.stackexchange.com/questions/69241/how-to-optimize-the-distance-function
+   * @param target Vector
+   * @returns number
+   */
+  public distanceApproximate(target: Vector): number {
+    const dx = Math.abs(this.x - target.x);
+    const dy = Math.abs(this.y - target.y);
+    return (1007 / 1024) * Math.max(dx, dy) + (441 / 1024) * Math.min(dx, dy);
   }
 
   static directionToTarget(source: Vector, target: Vector): Vector {

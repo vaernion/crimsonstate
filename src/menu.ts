@@ -1,14 +1,31 @@
 import { Controls, InputsActive } from "./controls";
+import { controlsHelp } from "./data/controlsHelp";
+import { credits } from "./data/credits";
 import { style, themeColor } from "./data/style";
 import { GameFrames, GameState } from "./game";
+import { Sound } from "./sound";
+
+enum MenuPage {
+  main = "main",
+  profile = "profile",
+  settings = "settings",
+  controls = "controls",
+  credits = "credits",
+}
 
 export class Menu {
   public isShowingMenu: boolean = true;
   public isStartingGame: boolean = false;
-  private menuItems = this.initMenuItems();
+  private menuItems: Record<MenuPage, MenuItem[]> = this.initMenuItems();
+  private menuPage: MenuPage = MenuPage.main;
   private selectedItemIndex: number = 0;
   private lastMenuInteractionTimestamp: number = 0;
   private menuInteractionCooldown: number = 250; // necessary to prevent one interaction per update
+  private sound: Sound;
+
+  constructor(sound: Sound) {
+    this.sound = sound;
+  }
 
   public isCoolingDown(timestamp: number) {
     return (
@@ -27,25 +44,32 @@ export class Menu {
       this.selectedItemIndex =
         this.selectedItemIndex - 1 >= 0
           ? this.selectedItemIndex - 1
-          : this.menuItems.length - 1;
+          : this.menuItems[this.menuPage].length - 1;
     }
     // down
     if (controls.keys.down) {
       this.selectedItemIndex =
-        (this.selectedItemIndex + 1) % this.menuItems.length;
+        (this.selectedItemIndex + 1) % this.menuItems[this.menuPage].length;
     }
     // activate
     if (controls.keys.space) {
-      this.menuItems[this.selectedItemIndex].onactivation();
-      controls.keys = new InputsActive(); // catch-all to avoid accidental actions
+      this.menuItems[this.menuPage][this.selectedItemIndex].onactivation();
     }
-    // return from submenu or resume game
-    else if (controls.keys.esc && state.hasStarted) {
+    // resume game
+    else if (
+      controls.keys.esc &&
+      state.hasStarted &&
+      this.menuPage === MenuPage.main
+    ) {
       this.isShowingMenu = false;
       state.paused = false;
-      controls.keys = new InputsActive(); // catch-all to avoid accidental actions
+    }
+    // return from submenus
+    else if (controls.keys.esc && this.menuPage !== MenuPage.main) {
+      this.returnToMainMenu();
     }
 
+    controls.keys = new InputsActive(); // catch-all to avoid accidental actions
     this.lastMenuInteractionTimestamp = frames.realTime;
   }
 
@@ -60,34 +84,61 @@ export class Menu {
     ctx.fillStyle = style.menuColor.bg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const itemHeight = canvas.height * 0.1;
+    const itemHeight = canvas.height * 0.08;
 
     // draw menu buttons
-    this.menuItems.forEach((item, idx) => {
+    this.menuItems[this.menuPage].forEach((item, idx) => {
       ctx.fillStyle =
         this.selectedItemIndex === idx
           ? style.menuColor.buttonSelected
           : style.menuColor.button;
 
+      // navigation button
       ctx.fillRect(
-        canvas.width * 0.1,
+        canvas.width * 0.06,
         (canvas.height * 0.1 + itemHeight) * (1 + idx) * 0.8,
-        canvas.width * 0.2,
+        canvas.width * 0.16,
         itemHeight
       );
 
-      // button text
+      // navigation button text
       ctx.fillStyle = style.menuColor.buttonText;
       ctx.font = style.canvasFonts.menu;
       ctx.textBaseline = "middle";
       ctx.textAlign = "center";
       ctx.fillText(
         item.label === "Start" && state.hasStarted ? "Resume" : item.label,
-        canvas.width * 0.2,
+        canvas.width * 0.14,
         (canvas.height * 0.1 + itemHeight) * (1 + idx) * 0.8 + itemHeight * 0.5
       );
     });
 
+    // subpage label
+    if (this.menuPage !== MenuPage.main) {
+      ctx.fillStyle = style.menuColor.pageLabel;
+      ctx.font = style.canvasFonts.menu;
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
+      ctx.fillText(this.menuPage, canvas.width * 0.5, canvas.height * 0.1);
+    }
+
+    // draw other menu content
+    if (this.menuPage === MenuPage.main) {
+      this.drawMain(ctx, canvas);
+    } else if (this.menuPage === MenuPage.profile) {
+      this.drawProfile(ctx, canvas);
+    } else if (this.menuPage === MenuPage.settings) {
+      this.drawSettings(ctx, canvas);
+    } else if (this.menuPage === MenuPage.controls) {
+      this.drawControls(ctx, canvas);
+    } else if (this.menuPage === MenuPage.credits) {
+      this.drawCredits(ctx, canvas);
+    }
+
+    ctx.restore();
+  }
+
+  private drawMain(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
     // crimsonstate art/image here later instead of rectangle
     ctx.fillStyle = themeColor.c4;
     ctx.fillRect(
@@ -96,25 +147,121 @@ export class Menu {
       canvas.width * 0.2,
       canvas.height * 0.2
     );
+  }
 
-    ctx.restore();
+  private drawProfile(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement
+  ) {
+    // PLACEHOLDER: user profile
+  }
+
+  private drawSettings(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement
+  ) {
+    // Music on/off
+    ctx.fillStyle = style.menuColor.text;
+    ctx.font = style.canvasFonts.menu;
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "start";
+    ctx.fillText(
+      this.sound.isMusicToggled ? "on" : "off",
+      canvas.width * 0.25,
+      canvas.height * 0.328
+    );
+  }
+
+  private drawControls(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement
+  ) {
+    ctx.fillStyle = style.menuColor.controls;
+    ctx.font = style.canvasFonts.menuControls;
+    controlsHelp.forEach((help, i) => {
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "start";
+      ctx.fillText(
+        `${help.key} - ${help.function}`,
+        canvas.width * 0.25,
+        canvas.height * 0.15 + 25 * (i + 1),
+        canvas.width * 0.7
+      );
+    });
+  }
+
+  private drawCredits(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement
+  ) {
+    ctx.fillStyle = style.menuColor.credits;
+    ctx.font = style.canvasFonts.credits;
+    ctx.fillText("Music", canvas.width * 0.5, canvas.height * 0.15);
+    credits.music.forEach((music, i) => {
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "start";
+      ctx.fillText(
+        `${music.author} - ${music.title} (${music.license} - ${music.link})`,
+        canvas.width * 0.25,
+        canvas.height * 0.15 + 20 * (i + 1),
+        canvas.width * 0.7
+      );
+    });
+  }
+
+  private returnToMainMenu() {
+    this.menuPage = MenuPage.main;
+    this.selectedItemIndex = 0;
   }
 
   private initMenuItems() {
-    return [
-      new MenuItem("Start", () => {
-        this.isStartingGame = true;
-      }),
-      new MenuItem("Profile", () => {
-        console.log("profile");
-      }),
-      new MenuItem("Settings", () => {
-        console.log("settings");
-      }),
-      new MenuItem("Credits", () => {
-        console.log("credits");
-      }),
-    ];
+    return {
+      [MenuPage.main]: [
+        new MenuItem("Start", () => {
+          this.isStartingGame = true;
+        }),
+        new MenuItem("Profile", () => {
+          this.menuPage = MenuPage.profile;
+          this.selectedItemIndex = 0;
+        }),
+        new MenuItem("Settings", () => {
+          this.menuPage = MenuPage.settings;
+          this.selectedItemIndex = 0;
+        }),
+        new MenuItem("Controls", () => {
+          this.menuPage = MenuPage.controls;
+          this.selectedItemIndex = 0;
+        }),
+        new MenuItem("Credits", () => {
+          this.menuPage = MenuPage.credits;
+          this.selectedItemIndex = 0;
+        }),
+      ],
+      [MenuPage.profile]: [
+        new MenuItem("Back", () => {
+          this.returnToMainMenu();
+        }),
+      ],
+      [MenuPage.settings]: [
+        new MenuItem("Back", () => {
+          this.returnToMainMenu();
+        }),
+        new MenuItem("Music", () => {
+          this.sound.isMusicToggled = !this.sound.isMusicToggled;
+          this.sound.toggleMusicPause();
+        }),
+      ],
+      [MenuPage.controls]: [
+        new MenuItem("Back", () => {
+          this.returnToMainMenu();
+        }),
+      ],
+      [MenuPage.credits]: [
+        new MenuItem("Back", () => {
+          this.returnToMainMenu();
+        }),
+      ],
+    };
   }
 }
 

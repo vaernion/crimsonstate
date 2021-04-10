@@ -19,7 +19,7 @@ export interface WeaponVariant {
 }
 
 export const weaponVariants: Record<WeaponName, WeaponVariant> = {
-  hk45: {
+  [WeaponName.hk45]: {
     variant: "hk45",
     projectileVariant: projectileVariants.pistol,
     damage: 10,
@@ -31,7 +31,7 @@ export const weaponVariants: Record<WeaponName, WeaponVariant> = {
     penetration: 0,
     spread: 0,
   },
-  m4: {
+  [WeaponName.m4]: {
     variant: "m4",
     projectileVariant: projectileVariants.rifle,
     damage: 15,

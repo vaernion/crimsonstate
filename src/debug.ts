@@ -3,6 +3,7 @@ import { style } from "./data/style";
 import { Enemy } from "./enemy";
 import { GameFrames, GameState } from "./game";
 import { Player } from "./player";
+import { Sound } from "./sound";
 import { World } from "./world";
 
 export class Debug {
@@ -12,6 +13,7 @@ export class Debug {
     ctx: CanvasRenderingContext2D,
     state: GameState,
     frames: GameFrames,
+    sound: Sound,
     controls: Controls,
     world: World,
     player: Player,
@@ -63,6 +65,8 @@ export class Debug {
       (acc, cur) => (acc += cur.isVisible(visibleArea) ? 1 : 0),
       0
     )} / ${enemies.size}
+    $sound ${sound.isMusicToggled ? "music" : ""}
+    ${sound.music?.attributes[1].nodeValue?.split("/music/")[1]}
     `;
     // convert to array to have more than one line in canvas
     const debugInfoLines = debugInfo.split("\n").filter((e) => e !== "");

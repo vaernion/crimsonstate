@@ -68,7 +68,7 @@ consider: sprites, art library, music, sound effects
 | World                | area cells                 | 3x3 or 5x5 matrix, player always in center      |                    |
 | World                | infinite area              | generate cells around player (outside vision)   |                    |
 | Sound                | sound effects              | find free library with good sound design        |                    |
-| Sound                | music                      | freely licensed doom/metal-ish                  |                    |
+| Sound                | music                      | freely licensed doom/metal-ish                  | :heavy_check_mark: |
 | Save                 | auth and/or database       | Netlify serverless/AWS lambda & MongoDB Atlas   |                    |
 | _code_               | tests                      | Jest                                            |                    |
 | _code_               | CI/CD                      | Netlify?                                        |                    |

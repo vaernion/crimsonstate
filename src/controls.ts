@@ -10,6 +10,7 @@ export class InputsActive {
   public space = false;
   public reload = false;
   public nextAbility = false;
+  public toggleMusic = false;
   public pause = false;
   public restart = false;
   public timeSpeed = false;
@@ -32,6 +33,7 @@ export enum ControlsKeys {
   r = "r", // reload
   f = "f", // next ability
   esc = "Escape",
+  m = "m", // toggle music
   p = "p", // pause
   v = "v", // restart
   z = "z", // time speed
@@ -103,6 +105,9 @@ export class Controls {
         break;
       case ControlsKeys.f:
         if (ev.type === "keydown") this.keys.nextAbility = true;
+        break;
+      case ControlsKeys.m:
+        if (ev.type === "keydown") this.keys.toggleMusic = true;
         break;
       case ControlsKeys.p:
         if (ev.type === "keydown") this.keys.pause = true;

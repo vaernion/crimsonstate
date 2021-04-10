@@ -6,6 +6,7 @@ import { HUD } from "./hud";
 import { Menu } from "./menu";
 import { Player } from "./player";
 import { Projectile } from "./projectile";
+import { Sound } from "./sound";
 import { Spawner } from "./spawner";
 import { World } from "./world";
 
@@ -35,8 +36,9 @@ export class Game {
   private state: GameState = new GameState();
   private frames: GameFrames = new GameFrames();
 
-  private menu: Menu = new Menu();
+  private menu: Menu;
   private hud: HUD = new HUD();
+  private sound: Sound = new Sound();
   private controls: Controls;
   private world: World;
   private player: Player;
@@ -45,6 +47,7 @@ export class Game {
   private projectiles: Set<Projectile> = new Set();
 
   constructor(canvas: HTMLCanvasElement) {
+    this.menu = new Menu(this.sound);
     this.world = new World(constants.world.width, constants.world.height);
     this.player = new Player(
       this.world,
@@ -82,7 +85,7 @@ export class Game {
     this.frames = new GameFrames();
     this.frames.realTime = previousRealTime;
     this.frames.realFrames = previousRealFrames;
-    this.menu = new Menu();
+    this.menu = new Menu(this.sound);
     this.hud = new HUD();
     this.world = new World(this.world.width, this.world.height);
     this.player = new Player(
@@ -113,6 +116,7 @@ export class Game {
       this.frames,
       this.state,
       this.menu,
+      this.sound,
       this.controls,
       this.world,
       this.player,
@@ -130,6 +134,7 @@ export class Game {
       this.frames,
       this.menu,
       this.hud,
+      this.sound,
       this.controls,
       this.world,
       this.player,
@@ -144,6 +149,7 @@ export class Game {
     frames: GameFrames,
     state: GameState,
     menu: Menu,
+    sound: Sound,
     controls: Controls,
     world: World,
     player: Player,
@@ -177,7 +183,10 @@ export class Game {
     }
 
     // ---------- HANDLE MISC KEYS ----------
-    this.handleMiscKeys(state, frames, menu, controls);
+    this.handleMiscKeys(state, frames, menu, sound, controls);
+
+    // ---------- HANDLE MUSIC ----------
+    this.sound.startMusic();
 
     // ---------- HANDLE MENU ----------
     if (state.paused && menu.isShowingMenu) {
@@ -220,7 +229,7 @@ export class Game {
         projectiles.forEach((projectile) => {
           if (
             projectile.isDestroyed ||
-            projectile.startPosition.distance(projectile.position) >
+            projectile.startPosition.distanceApproximate(projectile.position) >
               projectile.maxRange
           ) {
             projectiles.delete(projectile);
@@ -247,6 +256,7 @@ export class Game {
     frames: GameFrames,
     menu: Menu,
     hud: HUD,
+    sound: Sound,
     controls: Controls,
     world: World,
     player: Player,
@@ -267,6 +277,7 @@ export class Game {
           ctx,
           state,
           frames,
+          sound,
           controls,
           world,
           player,
@@ -313,7 +324,17 @@ export class Game {
 
     // debug info on top
     if (controls.showDebug) {
-      debug.draw(canvas, ctx, state, frames, controls, world, player, enemies);
+      debug.draw(
+        canvas,
+        ctx,
+        state,
+        frames,
+        sound,
+        controls,
+        world,
+        player,
+        enemies
+      );
     }
   }
 
@@ -348,6 +369,7 @@ export class Game {
     state: GameState,
     frames: GameFrames,
     menu: Menu,
+    sound: Sound,
     controls: Controls
   ) {
     // // ---------- PAUSE ----------
@@ -369,6 +391,13 @@ export class Game {
       state.timeSpeedCustom =
         state.timeSpeedCustom > 1 ? 0.5 : state.timeSpeedCustom < 1 ? 1.0 : 3.0;
       controls.keys.timeSpeed = false;
+    }
+
+    // toggle music
+    if (controls.keys.toggleMusic) {
+      sound.isMusicToggled = !sound.isMusicToggled;
+      sound.toggleMusicPause();
+      controls.keys.toggleMusic = false;
     }
 
     // open menu or close level up screen
