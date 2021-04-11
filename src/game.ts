@@ -61,8 +61,7 @@ export class Game {
     } else {
       throw new Error("canvas context is null");
     }
-    this.canvas.height = window.innerHeight * constants.canvas.heightFraction;
-    this.canvas.width = this.canvas.height * constants.canvas.ratio;
+    this.resizeCanvas(canvas);
     this.controls = new Controls(document, canvas);
   }
 
@@ -264,8 +263,7 @@ export class Game {
     projectiles: Set<Projectile>
   ): void {
     // dynamic canvas resize
-    canvas.height = window.innerHeight * constants.canvas.heightFraction;
-    canvas.width = canvas.height * constants.canvas.ratio;
+    this.resizeCanvas(canvas);
 
     // menu screen
     if (menu.isShowingMenu) {
@@ -336,6 +334,18 @@ export class Game {
         enemies
       );
     }
+  }
+
+  /**
+   * Dynamically resize canvas to fit as configured aspect ratio in window.
+   */
+  private resizeCanvas(canvas: HTMLCanvasElement) {
+    canvas.height =
+      window.innerWidth / window.innerHeight >= constants.canvas.ratio
+        ? window.innerHeight * constants.canvas.fraction
+        : (window.innerWidth / constants.canvas.ratio) *
+          constants.canvas.fraction;
+    canvas.width = canvas.height * constants.canvas.ratio;
   }
 
   private handleGameKeys(

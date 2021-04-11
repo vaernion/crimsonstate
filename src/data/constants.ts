@@ -1,8 +1,7 @@
 export const constants = {
   canvas: {
     ratio: 16 / 9,
-    // widthFraction: 0.9, // unused
-    heightFraction: 0.75,
+    fraction: 0.8, // unused
   },
   friction: 0.89,
   world: {
