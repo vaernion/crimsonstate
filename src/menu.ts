@@ -87,16 +87,16 @@ export class Menu {
     const itemHeight = canvas.height * 0.08;
 
     // draw menu buttons
-    this.menuItems[this.menuPage].forEach((item, idx) => {
+    this.menuItems[this.menuPage].forEach((item, i) => {
       ctx.fillStyle =
-        this.selectedItemIndex === idx
+        this.selectedItemIndex === i
           ? style.menuColor.buttonSelected
           : style.menuColor.button;
 
       // navigation button
       ctx.fillRect(
         canvas.width * 0.06,
-        (canvas.height * 0.1 + itemHeight) * (1 + idx) * 0.8,
+        (canvas.height * 0.1 + itemHeight) * (1 + i) * 0.8,
         canvas.width * 0.16,
         itemHeight
       );
@@ -109,7 +109,7 @@ export class Menu {
       ctx.fillText(
         item.label === "Start" && state.hasStarted ? "Resume" : item.label,
         canvas.width * 0.14,
-        (canvas.height * 0.1 + itemHeight) * (1 + idx) * 0.8 + itemHeight * 0.5
+        (canvas.height * 0.1 + itemHeight) * (1 + i) * 0.8 + itemHeight * 0.5
       );
     });
 

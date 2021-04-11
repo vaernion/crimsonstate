@@ -11,7 +11,8 @@ export class Sound {
   public startMusic() {
     try {
       if (this.isMusicToggled && !this.isPlayingMusic && !this.musicError) {
-        this.musicIndex = (this.musicIndex + 1) % credits.music.length; // random start, but cycle through all music
+        // random start, but cycle through all music
+        this.musicIndex = (this.musicIndex + 1) % credits.music.length;
         const musicFile = credits.music[this.musicIndex].file;
         this.music = new Audio(`assets/music/${musicFile}`);
         this.music.volume = 0.3;
@@ -19,9 +20,9 @@ export class Sound {
         // this.music.muted = true;
         this.music.play();
         this.isPlayingMusic = true;
-        this.music.addEventListener("ended", () => {
-          this.isPlayingMusic = false; // will lead startMusic() to run again
-        });
+        this.music.onended = () => {
+          this.isPlayingMusic = false; // startMusic() will start a new track
+        };
         console.log(this.music);
       }
     } catch (err) {
