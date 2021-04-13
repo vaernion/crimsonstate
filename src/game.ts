@@ -20,7 +20,7 @@ export class GameState {
 export class GameFrames {
   public realFrames: number = 0; // total number of frames rendered
   public gameFrames: number = 0; // total number of frames simulated
-  public realTime: number = 0; // real world
+  public realTime: number = 0; // IRL time
   public gameTime: number = 0; // ingame time
   public dt: number = 1000 / 60; // 16.67ms (60fps) per logic update
   public lag: number = 0; // accumulated dt
@@ -209,19 +209,27 @@ export class Game {
           controls,
           world,
           player,
-          enemies
+          enemies,
+          projectiles
         );
-        player.update(controls, frames, world, projectiles);
+        player.update(controls, frames, world, player, enemies, projectiles);
 
         // generates new entitites if appropiate
         spawner.generate(frames, visibleArea, world, player, enemies);
 
         // other entitites movement/actions/triggers
         enemies.forEach((enemy) => {
-          enemy.update(controls, frames, world, projectiles, player);
+          enemy.update(controls, frames, world, player, enemies, projectiles);
         });
         projectiles.forEach((projectile) => {
-          projectile.update(controls, frames, world);
+          projectile.update(
+            controls,
+            frames,
+            world,
+            player,
+            enemies,
+            projectiles
+          );
         });
 
         // remove projectiles that are destroyed (collided) or traveled max range
@@ -236,6 +244,11 @@ export class Game {
         });
 
         // remove other destroyed entities
+        enemies.forEach((enemy) => {
+          if (enemy.health <= 0) {
+            enemies.delete(enemy);
+          }
+        });
 
         // calculate ability
         // calculate damage
@@ -355,7 +368,8 @@ export class Game {
     controls: Controls,
     world: World,
     player: Player,
-    enemies: Set<Enemy>
+    enemies: Set<Enemy>,
+    projectiles: Set<Projectile>
   ) {
     // select next ability
     if (controls.keys.nextAbility) {
@@ -364,7 +378,7 @@ export class Game {
     }
     // use ability
     else if (controls.keys.space) {
-      player.useAbility(frames, world, enemies);
+      player.useAbility(frames, world, enemies, projectiles);
       controls.keys.space = false;
     }
     // reload

@@ -44,11 +44,12 @@ export class Spawner {
         i++
       ) {
         // PLACEHOLDER: unweighted random enemy selection
-        let enemyVariant = Object.values(enemyVariants)[
+        const enemyVariant = Object.values(enemyVariants)[
           Math.floor(Math.random() * Object.keys(enemyVariants).length)
         ];
-        let position = this.randomPosition(world);
-        let enemy = new Enemy(enemyVariant, position);
+        // const enemyVariant = enemyVariants.slow;
+        const position = this.randomPosition(world);
+        const enemy = new Enemy(enemyVariant, position);
 
         // force visible enemies outside visible range
         // MovingEntity.fixEdgeCollision() will ensure they remain in-bounds

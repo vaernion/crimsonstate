@@ -20,11 +20,11 @@ TypeScript, Canvas
 
 ### Partial TODO
 
-asap: entity collision detection, damage inflicted, weapon spawns/pickup
+asap: weapon spawns/pickup, player death/win/lose
 
 then: static entities (terrain, water, plants, hazards, fire, traps), aoe damage?
 
-consider: sprites, art library, music, sound effects
+consider: sprites, art library, music, sound effects, improving and tweaking collision
 
 ### Features
 
@@ -33,7 +33,7 @@ consider: sprites, art library, music, sound effects
 | Game                 | loop & hierarchy           |                                                 | :heavy_check_mark: |
 | Controls             | intercept & buffer input   |                                                 | :heavy_check_mark: |
 | Player               | movement                   |                                                 | :heavy_check_mark: |
-| Player               | entity collision           |                                                 |                    |
+| Player               | entity collision           |                                                 | :heavy_check_mark: |
 | World                | world constructor          | only determines max area for now                | :heavy_check_mark: |
 | Game                 | world edge                 | draw & collision                                | :heavy_check_mark: |
 | Game Menu Controls   | pause game                 | conditional update in Game                      | :heavy_check_mark: |
@@ -47,7 +47,7 @@ consider: sprites, art library, music, sound effects
 | Entity Spawner       | generate enemies over time | randomly placed inside world for now            | :heavy_check_mark: |
 | Entity               | spawn outside vision       | depends on camera (canvas) size                 | :heavy_check_mark: |
 | MovingEntity         | move towards player        |                                                 | :heavy_check_mark: |
-| Entity               | take damage & destruction  | enemies.delete(this) should work                |                    |
+| Entity               | take damage & destruction  | enemies.delete(this) should work                | :heavy_check_mark: |
 | Game Player          | win/lose conditions        | lose: death, win: score/kills/time              |                    |
 | Player               | use ability                | screen (visible enemies?) wipe, heal item       | :heavy_check_mark: |
 | Player               | ability variety            | more consumables and/or cooldown based          |                    |
@@ -55,7 +55,7 @@ consider: sprites, art library, music, sound effects
 | Weapon Controls      | fire projectile            | mouse1, vector player -> aim direction          | :heavy_check_mark: |
 | Game Weapon          | spawn in world             |                                                 |                    |
 | Player Weapon        | pick up weapon             | on collision? attached? visuals?                |                    |
-| Entity Projectile    | move & collide             | overload entity calculatevector (no friction)   |                    |
+| Entity Projectile    | move & collide             | overload entity calculatevector (no friction)   | :heavy_check_mark: |
 | Entity Enemy         | enemy ranged attacks       | vector enemy -> player                          | :heavy_check_mark: |
 | World Player Entity  | powerups                   | activated on collision,various effects          |                    |
 | Player Game Controls | upgrades                   | xp, pause and select stat++ and/or ability      |                    |
@@ -74,7 +74,7 @@ consider: sprites, art library, music, sound effects
 | _code_               | CI/CD                      | Netlify?                                        |                    |
 | _content_            | more variety               | more enemies, weapons, upgrades, worlds(?) etc. |                    |
 
-### Structure so far
+### Structure so far (outdated)
 
 ```js
 Game

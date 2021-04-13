@@ -60,7 +60,7 @@ export class Weapon implements WeaponVariant {
         projectiles.add(projectile);
 
         return true;
-      } else if (this.ammo > 0) {
+      } else {
         this.startReload(gameTime);
         return false;
       }

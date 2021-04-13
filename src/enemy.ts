@@ -32,15 +32,16 @@ export class Enemy extends Entity {
     controls: Controls,
     frames: GameFrames,
     world: World,
-    projectiles: Set<Projectile>,
-    player: Player
+    player: Player,
+    enemies: Set<Enemy>,
+    projectiles: Set<Projectile>
   ) {
     // default direction == player.position
     const moveDirection = Vector.directionToTarget(
       this.position,
       player.position
     );
-    this.move(moveDirection, world);
+    this.move(moveDirection, world, player, enemies);
 
     // check if reload is done
     this.weapon?.checkReload(frames.gameTime);
@@ -52,7 +53,12 @@ export class Enemy extends Entity {
     );
 
     // decide when to attack?
-    if (Math.random() < 0.1) {
+    if (
+      this.weapon &&
+      this.position.distance(player.position) <=
+        this.weapon.projectileVariant.maxRange &&
+      Math.random() < 0.1
+    ) {
       this.weapon?.shoot(frames.gameTime, projectiles, this, aimDirection);
     }
   }

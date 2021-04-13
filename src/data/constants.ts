@@ -5,37 +5,41 @@ export const constants = {
   },
   friction: 0.89,
   world: {
-    width: 1500,
-    height: 800,
+    width: 1000,
+    height: 700,
   },
   player: {
     width: 20,
-    height: 45,
-    headSize: 15,
-    health: 50,
+    height: 35,
+    headSize: 10,
+    health: 100,
     maxHealth: 200,
     acceleration: {
-      x: 1.3,
-      y: 1.3,
+      x: 1.1,
+      y: 1.1,
     },
-    maxSpeed: 4,
+    maxSpeed: 3,
     consumables: {
       initial: {
-        bomb: 3,
+        bomb: 7,
         medpack: 4,
       },
       max: {
-        bomb: 6,
+        bomb: 10,
         medpack: 6,
       },
       effect: {
+        bomb: 100,
         medpack: 60,
+      },
+      range: {
+        bomb: 400,
       },
     },
   },
   enemy: {
-    maxCount: 10,
-    spawnDelay: 2000,
-    spawnGroup: 15,
+    maxCount: 30,
+    spawnDelay: 1000,
+    spawnGroup: 5,
   },
 };

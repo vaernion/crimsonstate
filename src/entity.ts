@@ -1,7 +1,9 @@
 import { Controls } from "./controls";
 import { constants } from "./data/constants";
+import { DamageVariant } from "./data/damage";
 import { EntityFaction, EntityType } from "./data/entities";
 import { style } from "./data/style";
+import { Enemy } from "./enemy";
 import { GameFrames } from "./game";
 import { Player } from "./player";
 import { Projectile } from "./projectile";
@@ -79,19 +81,68 @@ export class Entity {
     );
   }
 
+  public leftSide(): number {
+    return this.position.x - this.width / 2;
+  }
+  public rightSide(): number {
+    return this.position.x + this.width / 2;
+  }
+  public topSide(): number {
+    return this.position.y - this.height / 2;
+  }
+  public bottomSide(): number {
+    return this.position.y + this.height / 2;
+  }
+
+  // Axis-Aligned Bounding Box
+  public isCollidingWith(other: Entity): boolean {
+    return (
+      this.leftSide() <= other.rightSide() &&
+      this.rightSide() >= other.leftSide() &&
+      this.topSide() <= other.bottomSide() &&
+      this.bottomSide() >= other.topSide()
+    );
+  }
+
+  private isCollidingLeft(other: Entity): boolean {
+    return (
+      this.rightSide() - this.velocity.x < other.leftSide() &&
+      this.rightSide() >= other.leftSide()
+    );
+  }
+  private isCollidingRight(other: Entity): boolean {
+    return (
+      this.leftSide() - this.velocity.x >= other.rightSide() &&
+      this.leftSide() < other.rightSide()
+    );
+  }
+  private isCollidingTop(other: Entity): boolean {
+    return (
+      this.bottomSide() - this.velocity.y < other.topSide() &&
+      this.bottomSide() >= other.topSide()
+    );
+  }
+  private isCollidingBottom(other: Entity): boolean {
+    return (
+      this.topSide() - this.velocity.y >= other.bottomSide() &&
+      this.topSide() < other.bottomSide()
+    );
+  }
+
   public update(
     controls: Controls,
     frames: GameFrames,
     world: World,
-    projectiles: Set<Projectile>,
-    player: Player
+    player: Player,
+    enemies: Set<Enemy>,
+    projectiles: Set<Projectile>
   ) {
     // default direction == player.position
     const moveDirection = Vector.directionToTarget(
       this.position,
       player.position
     );
-    this.move(moveDirection, world);
+    this.move(moveDirection, world, player, enemies);
 
     // PLACEHOLDER: interact with other objects
     // damage nearby stuff if hazard
@@ -123,10 +174,22 @@ export class Entity {
     }
   }
 
-  public move(direction: Vector, world: World) {
+  public takeDamage(damage: number, damageVariant: DamageVariant) {
+    // TODO: armor types/damage resistance vs damagetype and armor
+    this.health -= damage;
+  }
+
+  public move(
+    direction: Vector,
+    world: World,
+    player: Player,
+    enemies: Set<Enemy>
+  ) {
+    if (this.maxSpeed <= 0) return; // static entity
     this.calculatePosition(direction);
-    this.fixEntityCollision();
-    const collidedWithEdge = this.fixEdgeCollision(world);
+    this.detectCollisions(player, enemies);
+
+    const collidedWithEdge = this.handleWorldEdgeCollision(world);
     if (collidedWithEdge && this.type === EntityType.projectile)
       this.isDestroyed = true;
   }
@@ -150,30 +213,50 @@ export class Entity {
     this.position.y += this.velocity.y;
   }
 
-  public fixEntityCollision() {}
+  public detectCollisions(player: Player, enemies: Set<Enemy>) {
+    if (this.type !== EntityType.player && this.isCollidingWith(player)) {
+      this.handleEntityCollision(player);
+    }
+    for (const enemy of enemies.values()) {
+      if (this.isCollidingWith(enemy)) {
+        this.handleEntityCollision(enemy);
+      }
+    }
+  }
 
-  public fixEdgeCollision(world: World): boolean {
+  private handleEntityCollision(other: Entity) {
+    if (this.isCollidingLeft(other) || this.isCollidingRight(other)) {
+      this.velocity.x = -this.velocity.x;
+      this.position.x += this.velocity.x;
+    }
+    if (this.isCollidingTop(other) || this.isCollidingBottom(other)) {
+      this.velocity.y = -this.velocity.y;
+      this.position.y += this.velocity.y;
+    }
+  }
+
+  public handleWorldEdgeCollision(world: World): boolean {
     let collided = false;
     // left edge
-    if (this.position.x - this.width / 2 <= 0) {
+    if (this.leftSide() <= 0) {
       this.position.x = this.width / 2;
       this.velocity.x = 0;
       collided = true;
     }
     // top edge
-    if (this.position.y - this.height / 2 <= 0) {
+    if (this.topSide() <= 0) {
       this.position.y = this.height / 2;
       this.velocity.y = 0;
       collided = true;
     }
     // right edge
-    if (this.position.x + this.width / 2 >= world.width) {
+    if (this.rightSide() >= world.width) {
       this.position.x = world.width - this.width / 2;
       this.velocity.x = 0;
       collided = true;
     }
     // bottom edge
-    if (this.position.y + this.height / 2 >= world.height) {
+    if (this.bottomSide() >= world.height) {
       this.position.y = world.height - this.height / 2;
       this.velocity.y = 0;
       collided = true;

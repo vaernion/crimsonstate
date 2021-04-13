@@ -5,8 +5,10 @@ import {
   ProjectileVariant,
 } from "./data/damage";
 import { EntityFaction, EntityType } from "./data/entities";
+import { Enemy } from "./enemy";
 import { Entity, Vector } from "./entity";
 import { GameFrames } from "./game";
+import { Player } from "./player";
 import { World } from "./world";
 
 export class Projectile extends Entity {
@@ -55,8 +57,32 @@ export class Projectile extends Entity {
     this.height = projectileVariant.height;
   }
 
-  public update(controls: Controls, frames: GameFrames, world: World) {
-    this.move(this.direction, world);
+  public update(
+    controls: Controls,
+    frames: GameFrames,
+    world: World,
+    player: Player,
+    enemies: Set<Enemy>,
+    projectiles: Set<Projectile>
+  ) {
+    this.move(this.direction, world, player, enemies);
     // PLACEHOLDER: interact with other objects
+  }
+
+  private dealDamage(target: Entity) {
+    target.takeDamage(this.damage, this.damageVariant);
+    this.isDestroyed = true;
+  }
+
+  public detectCollisions(player: Player, enemies: Set<Enemy>) {
+    if (this.faction !== EntityFaction.player && this.isCollidingWith(player)) {
+      this.dealDamage(player);
+    }
+
+    enemies.forEach((enemy) => {
+      if (this.faction !== EntityFaction.enemy && this.isCollidingWith(enemy)) {
+        this.dealDamage(enemy);
+      }
+    });
   }
 }

@@ -1,5 +1,6 @@
 import { Controls } from "./controls";
 import { constants } from "./data/constants";
+import { DamageType, damageVariants } from "./data/damage";
 import { EntityFaction, EntityType } from "./data/entities";
 import { style } from "./data/style";
 import { WeaponName } from "./data/weapons";
@@ -29,11 +30,15 @@ class Consumables {
     }
     return false;
   }
-  add(consumable: Consumable) {
+  add(consumable: Consumable, count: number) {
     if (
       this.inventory[consumable] < constants.player.consumables.max[consumable]
     ) {
-      this.inventory[consumable]++;
+      this.inventory[consumable] += Math.min(
+        count,
+        constants.player.consumables.max[consumable] -
+          this.inventory[consumable]
+      );
     }
   }
 }
@@ -60,17 +65,19 @@ export class Player extends Entity {
 
     this.health = health;
     this.maxHealth = maxHealth;
-    this.weapon = new Weapon(WeaponName.hk45, 0.5);
+    this.weapon = new Weapon(WeaponName.minigun, 1);
   }
 
   public update(
     controls: Controls,
     frames: GameFrames,
     world: World,
+    player: Player,
+    enemies: Set<Enemy>,
     projectiles: Set<Projectile>
   ) {
     const moveDirection = this.getMoveDirection(controls);
-    this.move(moveDirection, world);
+    this.move(moveDirection, world, player, enemies);
 
     // check if reload is done
     this.weapon?.checkReload(frames.gameTime);
@@ -102,6 +109,7 @@ export class Player extends Entity {
     // player head placeholder
     ctx.beginPath();
     ctx.strokeStyle = style.playerColor.outline;
+    ctx.fillStyle = style.playerColor.fill;
     ctx.arc(
       canvas.width / 2,
       canvas.height / 2 - this.headSize,
@@ -109,6 +117,7 @@ export class Player extends Entity {
       0,
       2 * Math.PI
     );
+    ctx.fill();
     ctx.stroke();
   }
 
@@ -142,13 +151,36 @@ export class Player extends Entity {
     this.consumables.selected = nextConsumable;
   }
 
-  public useAbility(frames: GameFrames, world: World, enemies: Set<Enemy>) {
+  public useAbility(
+    frames: GameFrames,
+    world: World,
+    enemies: Set<Enemy>,
+    projectiles: Set<Projectile>
+  ) {
     // bomb
     if (
       this.consumables.selected === Consumable.bomb &&
       this.consumables.use(Consumable.bomb)
     ) {
-      enemies.clear();
+      enemies.forEach((enemy) => {
+        if (
+          this.position.distance(enemy.position) <=
+          constants.player.consumables.range[Consumable.bomb]
+        ) {
+          enemy.takeDamage(
+            constants.player.consumables.effect[Consumable.bomb],
+            damageVariants[DamageType.explosive]
+          );
+        }
+      });
+      projectiles.forEach((projectile) => {
+        if (
+          this.position.distance(projectile.position) <=
+          constants.player.consumables.range[Consumable.bomb]
+        ) {
+          projectiles.delete(projectile);
+        }
+      });
       // PLACEHOLDER: screen clear ability visuals/feedback
       // add effect to set of effects
       // include gameTimestamp as effect property so it can be removed later
