@@ -9,13 +9,14 @@ export const themeColor = {
 
 export const style = {
   canvasFonts: {
-    hud: "18px sans-serif",
+    hud: "1rem sans-serif",
     pause: "italic 1.5rem monospace",
     menu: "1.7rem monospace",
     credits: "0.9rem monospace",
     menuControls: "1.5rem monospace",
     debug: "0.9rem sans-serif",
     debugSize: 16,
+    itemPickup: "0.9rem monospace",
   },
   debugColor: {
     text: "white",
@@ -55,6 +56,7 @@ export const style = {
   },
   entityColor: {
     default: "black",
+    weapon: "black",
   },
   enemyColor: {
     normal: "purple",

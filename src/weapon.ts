@@ -1,7 +1,74 @@
 import { ProjectileVariant } from "./data/damage";
+import { EntityType } from "./data/entities";
+import { style } from "./data/style";
 import { WeaponName, WeaponVariant, weaponVariants } from "./data/weapons";
 import { Entity, Vector } from "./entity";
+import { GameFrames } from "./game";
+import { Player } from "./player";
 import { Projectile } from "./projectile";
+import { World } from "./world";
+
+export class WeaponPickup extends Entity {
+  public weapon: Weapon;
+  constructor(
+    weaponName: WeaponName,
+    ammoFraction: number,
+    public position: Vector
+  ) {
+    super();
+    this.type = EntityType.weaponPickup;
+    this.weapon = new Weapon(weaponName, ammoFraction);
+    this.name = this.weapon.name;
+    this.position = position;
+    this.width = this.weapon.width;
+    this.height = this.weapon.height;
+    this.color = this.weapon.color;
+  }
+
+  public draw(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    frames: GameFrames,
+    world: World,
+    player: Player
+  ) {
+    const visibleArea = world.visibleArea(canvas, player);
+    if (this.isVisible(visibleArea)) {
+      // PLACEHOLDER: weapon hitbox
+      ctx.strokeStyle = this.color || style.entityColor.default;
+      ctx.strokeRect(
+        this.position.x -
+          visibleArea.xStart -
+          this.width / 2 +
+          this.velocity.x * frames.lagFraction,
+        this.position.y -
+          visibleArea.yStart -
+          this.height / 2 +
+          this.velocity.y * frames.lagFraction,
+        this.width,
+        this.height
+      );
+
+      // PLACEHOLDER: weapon name
+      ctx.fillStyle = this.color || style.entityColor.weapon;
+      ctx.font = style.canvasFonts.itemPickup;
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
+      ctx.fillText(
+        `${this.name}`,
+        this.position.x - visibleArea.xStart,
+        this.position.y - visibleArea.yStart
+      );
+    }
+  }
+
+  protected handleEntityCollision(other: Entity) {
+    if (other.type === EntityType.player) {
+      other.weapon = this.weapon;
+      this.isDestroyed = true;
+    }
+  }
+}
 
 export class Weapon implements WeaponVariant {
   lastAttackTime: number = 0;
@@ -9,7 +76,7 @@ export class Weapon implements WeaponVariant {
   reloadStartedTime: number = 0;
   reloadTime: number;
 
-  variant: string;
+  name: WeaponName;
   projectileVariant: ProjectileVariant;
   damage: number;
   magazineMax: number;
@@ -20,10 +87,13 @@ export class Weapon implements WeaponVariant {
   cooldown: number;
   penetration: number;
   spread: number;
+  width: number;
+  height: number;
+  color: string;
 
   constructor(weaponName: WeaponName, ammoFraction: number = 1) {
     const weaponVariant = weaponVariants[weaponName];
-    this.variant = weaponVariant.variant;
+    this.name = weaponVariant.name;
     this.projectileVariant = weaponVariant.projectileVariant;
     this.damage = weaponVariant.damage;
     this.magazineMax = weaponVariant.magazineMax;
@@ -35,6 +105,9 @@ export class Weapon implements WeaponVariant {
     this.cooldown = weaponVariant.cooldown;
     this.penetration = weaponVariant.penetration;
     this.spread = weaponVariant.spread;
+    this.width = weaponVariant.width;
+    this.height = weaponVariant.height;
+    this.color = weaponVariant.color;
   }
 
   public shoot(

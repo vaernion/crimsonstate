@@ -2,6 +2,7 @@ import { Controls, InputsActive } from "./controls";
 import { constants } from "./data/constants";
 import { Debug } from "./debug";
 import { Enemy } from "./enemy";
+import { Entity } from "./entity";
 import { HUD } from "./hud";
 import { Menu } from "./menu";
 import { Player } from "./player";
@@ -31,6 +32,8 @@ export class Game {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private animationFrameRequestId: number = 0;
+  // private capturer;
+  private isCapturing = false;
 
   private debug: Debug = new Debug();
   private state: GameState = new GameState();
@@ -45,6 +48,7 @@ export class Game {
   private spawner: Spawner = new Spawner();
   private enemies: Set<Enemy> = new Set();
   private projectiles: Set<Projectile> = new Set();
+  private staticEntities: Set<Entity> = new Set();
 
   constructor(canvas: HTMLCanvasElement) {
     this.menu = new Menu(this.sound);
@@ -121,7 +125,8 @@ export class Game {
       this.player,
       this.spawner,
       this.enemies,
-      this.projectiles
+      this.projectiles,
+      this.staticEntities
     );
     // console.timeEnd("update");
     // console.time("draw");
@@ -138,7 +143,8 @@ export class Game {
       this.world,
       this.player,
       this.enemies,
-      this.projectiles
+      this.projectiles,
+      this.staticEntities
     );
     // console.timeEnd("draw");
   }
@@ -154,7 +160,8 @@ export class Game {
     player: Player,
     spawner: Spawner,
     enemies: Set<Enemy>,
-    projectiles: Set<Projectile>
+    projectiles: Set<Projectile>,
+    staticEntities: Set<Entity>
   ): void {
     // skip certain frames mod 10 for delta time testing
     // if ([0, 1, 3, 5, 6, 7].includes(this.frames.count % 10)) {
@@ -215,7 +222,14 @@ export class Game {
         player.update(controls, frames, world, player, enemies, projectiles);
 
         // generates new entitites if appropiate
-        spawner.generate(frames, visibleArea, world, player, enemies);
+        spawner.generate(
+          frames,
+          visibleArea,
+          world,
+          player,
+          enemies,
+          staticEntities
+        );
 
         // other entitites movement/actions/triggers
         enemies.forEach((enemy) => {
@@ -231,6 +245,9 @@ export class Game {
             projectiles
           );
         });
+        staticEntities.forEach((entity) => {
+          entity.update(controls, frames, world, player, enemies, projectiles);
+        });
 
         // remove projectiles that are destroyed (collided) or traveled max range
         projectiles.forEach((projectile) => {
@@ -245,8 +262,13 @@ export class Game {
 
         // remove other destroyed entities
         enemies.forEach((enemy) => {
-          if (enemy.health <= 0) {
+          if ((enemy.isDestroyed || enemy.health <= 0) && !enemy.isInvincible) {
             enemies.delete(enemy);
+          }
+        });
+        staticEntities.forEach((entity) => {
+          if (entity.isDestroyed && !entity.isInvincible) {
+            staticEntities.delete(entity);
           }
         });
 
@@ -273,7 +295,8 @@ export class Game {
     world: World,
     player: Player,
     enemies: Set<Enemy>,
-    projectiles: Set<Projectile>
+    projectiles: Set<Projectile>,
+    staticEntities: Set<Entity>
   ): void {
     // dynamic canvas resize
     this.resizeCanvas(canvas);
@@ -320,7 +343,7 @@ export class Game {
     ctx.fillRect(
       canvas.width / 2,
       canvas.height / 2 - player.height / 4,
-      player.height * 2,
+      player.height,
       player.height / 2
     );
     ctx.restore();
@@ -328,6 +351,9 @@ export class Game {
     // other entities
     projectiles.forEach((projectile) => {
       projectile.draw(canvas, ctx, frames, world, player);
+    });
+    staticEntities.forEach((entity) => {
+      entity.draw(canvas, ctx, frames, world, player);
     });
 
     // HUD
@@ -454,6 +480,7 @@ export class Game {
       console.log("frames", this.frames);
       console.log("world", this.world);
       console.log("player", this.player);
+      console.log("staticEntities", this.staticEntities);
       console.table(this.enemies);
       // console.table(this.projectiles);
       console.log("projectiles remaining:", this.projectiles.size);

@@ -61,7 +61,7 @@ export class HUD {
     ctx.textBaseline = "middle";
     ctx.textAlign = "center";
     ctx.fillText(
-      `${player.weapon?.variant}`,
+      `${player.weapon?.name}`,
       canvas.width * 0.875,
       canvas.height * 0.82
     );

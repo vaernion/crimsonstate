@@ -18,7 +18,7 @@ export const constants = {
       x: 1.1,
       y: 1.1,
     },
-    maxSpeed: 3,
+    maxSpeed: 3.3,
     consumables: {
       initial: {
         bomb: 7,
@@ -38,8 +38,12 @@ export const constants = {
     },
   },
   enemy: {
-    maxCount: 30,
-    spawnDelay: 1000,
-    spawnGroup: 5,
+    maxCount: 100,
+    spawnDelay: 2000,
+    spawnGroup: 10,
+  },
+  weaponSpawns: {
+    maxCount: 5,
+    spawnDelay: 3000,
   },
 };

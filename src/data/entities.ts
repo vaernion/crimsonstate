@@ -8,6 +8,7 @@ export enum EntityType {
   projectile = "projectile",
   static = "static",
   hazard = "hazard",
+  weaponPickup = "weaponPickup",
 }
 
 export enum EntityFaction {

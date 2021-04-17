@@ -158,8 +158,8 @@ export class Entity {
   ) {
     const visibleArea = world.visibleArea(canvas, player);
     if (this.isVisible(visibleArea)) {
-      ctx.fillStyle = this.color || style.entityColor.default;
-      ctx.fillRect(
+      ctx.strokeStyle = this.color || style.entityColor.default;
+      ctx.strokeRect(
         this.position.x -
           visibleArea.xStart -
           this.width / 2 +
@@ -185,8 +185,9 @@ export class Entity {
     player: Player,
     enemies: Set<Enemy>
   ) {
-    if (this.maxSpeed <= 0) return; // static entity
-    this.calculatePosition(direction);
+    if (this.maxSpeed > 0) {
+      this.calculatePosition(direction);
+    }
     this.detectCollisions(player, enemies);
 
     const collidedWithEdge = this.handleWorldEdgeCollision(world);
@@ -214,9 +215,12 @@ export class Entity {
   }
 
   public detectCollisions(player: Player, enemies: Set<Enemy>) {
+    // colliding with player
     if (this.type !== EntityType.player && this.isCollidingWith(player)) {
       this.handleEntityCollision(player);
     }
+
+    // colliding with enemies
     for (const enemy of enemies.values()) {
       if (this.isCollidingWith(enemy)) {
         this.handleEntityCollision(enemy);
@@ -224,7 +228,7 @@ export class Entity {
     }
   }
 
-  private handleEntityCollision(other: Entity) {
+  protected handleEntityCollision(other: Entity) {
     if (this.isCollidingLeft(other) || this.isCollidingRight(other)) {
       this.velocity.x = -this.velocity.x;
       this.position.x += this.velocity.x;

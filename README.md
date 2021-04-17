@@ -20,11 +20,11 @@ TypeScript, Canvas
 
 ### Partial TODO
 
-asap: weapon spawns/pickup, player death/win/lose
+asap: player death/win/lose
 
 then: static entities (terrain, water, plants, hazards, fire, traps), aoe damage?
 
-consider: sprites, art library, music, sound effects, improving and tweaking collision
+consider: sprites, art library, music, sound effects, improving and tweaking collision, player progression/profile/unlocks
 
 ### Features
 
@@ -53,8 +53,8 @@ consider: sprites, art library, music, sound effects, improving and tweaking col
 | Player               | ability variety            | more consumables and/or cooldown based          |                    |
 | Controls Player?     | mouse aim                  | only when mouse inside canvas or not?           | :heavy_check_mark: |
 | Weapon Controls      | fire projectile            | mouse1, vector player -> aim direction          | :heavy_check_mark: |
-| Game Weapon          | spawn in world             |                                                 |                    |
-| Player Weapon        | pick up weapon             | on collision? attached? visuals?                |                    |
+| Game Weapon          | spawn in world             |                                                 | :heavy_check_mark: |
+| Player Weapon        | pick up weapon             | on collision? attached? visuals?                | :heavy_check_mark: |
 | Entity Projectile    | move & collide             | overload entity calculatevector (no friction)   | :heavy_check_mark: |
 | Entity Enemy         | enemy ranged attacks       | vector enemy -> player                          | :heavy_check_mark: |
 | World Player Entity  | powerups                   | activated on collision,various effects          |                    |
