@@ -27,7 +27,9 @@ export class Sound {
       }
     } catch (err) {
       console.error(err);
-      this.musicError = err;
+      if (err instanceof Error) {
+        this.musicError = err;
+      }
     }
   }
 
