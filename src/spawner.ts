@@ -55,9 +55,10 @@ export class Spawner {
         i++
       ) {
         // PLACEHOLDER: unweighted random enemy selection
-        const enemyVariant = Object.values(enemyVariants)[
-          Math.floor(Math.random() * Object.keys(enemyVariants).length)
-        ];
+        const enemyVariant =
+          Object.values(enemyVariants)[
+            Math.floor(Math.random() * Object.keys(enemyVariants).length)
+          ];
         // const enemyVariant = enemyVariants.slow;
         const position = this.randomPosition(world);
         const enemy = new Enemy(enemyVariant, position);
@@ -90,9 +91,10 @@ export class Spawner {
       ).length < constants.weaponSpawns.maxCount
     ) {
       // TODO: weapon rarity weighting or other spawn criteria
-      const weaponVariant = Object.values(weaponVariants)[
-        Math.floor(Math.random() * Object.keys(weaponVariants).length)
-      ];
+      const weaponVariant =
+        Object.values(weaponVariants)[
+          Math.floor(Math.random() * Object.keys(weaponVariants).length)
+        ];
       const ammoFraction = 0.5;
       const position = this.randomPosition(world);
       const weaponPickup = new WeaponPickup(
