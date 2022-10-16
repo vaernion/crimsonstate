@@ -2,7 +2,7 @@ import { Controls, InputsActive } from "./controls";
 import { constants } from "./data/constants";
 import { Debug } from "./debug";
 import { Enemy } from "./enemy";
-import { Entity } from "./entity";
+import { Entity, Vector } from "./entity";
 import { HUD } from "./hud";
 import { Menu } from "./menu";
 import { Player } from "./player";
@@ -54,9 +54,9 @@ export class Game {
     this.menu = new Menu(this.sound);
     this.world = new World(constants.world.width, constants.world.height);
     this.player = new Player(
-      this.world,
+      constants.player.healthMax,
       constants.player.health,
-      constants.player.maxHealth
+      new Vector(this.world.width / 2, this.world.height / 2)
     );
     this.canvas = canvas;
     const ctx = canvas.getContext("2d");
@@ -92,9 +92,9 @@ export class Game {
     this.hud = new HUD();
     this.world = new World(this.world.width, this.world.height);
     this.player = new Player(
-      this.world,
+      constants.player.healthMax,
       constants.player.health,
-      constants.player.maxHealth
+      new Vector(this.world.width / 2, this.world.height / 2)
     );
     this.spawner = new Spawner();
     this.enemies = new Set();
@@ -113,56 +113,25 @@ export class Game {
   private loop(timestamp: DOMHighResTimeStamp): void {
     // cancelAnimationFrame() does not work if request is at end
     this.animationFrameRequestId = requestAnimationFrame(this.loop.bind(this));
-    // console.time("update");
-    this.update(
-      timestamp,
-      this.frames,
-      this.state,
-      this.menu,
-      this.sound,
-      this.controls,
-      this.world,
-      this.player,
-      this.spawner,
-      this.enemies,
-      this.projectiles,
-      this.staticEntities
-    );
-    // console.timeEnd("update");
-    // console.time("draw");
-    this.draw(
-      this.canvas,
-      this.ctx,
-      this.debug,
-      this.state,
-      this.frames,
-      this.menu,
-      this.hud,
-      this.sound,
-      this.controls,
-      this.world,
-      this.player,
-      this.enemies,
-      this.projectiles,
-      this.staticEntities
-    );
-    // console.timeEnd("draw");
+    this.update(timestamp);
+    this.draw();
   }
 
-  private update(
-    timestamp: DOMHighResTimeStamp,
-    frames: GameFrames,
-    state: GameState,
-    menu: Menu,
-    sound: Sound,
-    controls: Controls,
-    world: World,
-    player: Player,
-    spawner: Spawner,
-    enemies: Set<Enemy>,
-    projectiles: Set<Projectile>,
-    staticEntities: Set<Entity>
-  ): void {
+  private update(timestamp: DOMHighResTimeStamp): void {
+    const {
+      frames,
+      state,
+      menu,
+      sound,
+      controls,
+      world,
+      player,
+      spawner,
+      enemies,
+      projectiles,
+      staticEntities,
+    } = this;
+
     // skip certain frames mod 10 for delta time testing
     // if ([0, 1, 3, 5, 6, 7].includes(this.frames.count % 10)) {
     //   this.frames.count++;
@@ -189,7 +158,7 @@ export class Game {
     }
 
     // ---------- HANDLE MISC KEYS ----------
-    this.handleMiscKeys(state, frames, menu, sound, controls);
+    this.handleMiscKeys();
 
     // ---------- HANDLE MUSIC ----------
     this.sound.startMusic();
@@ -209,16 +178,7 @@ export class Game {
         frames.lag -= frames.dt;
 
         // player movement/actions/keys
-        this.handleGameKeys(
-          state,
-          frames,
-          menu,
-          controls,
-          world,
-          player,
-          enemies,
-          projectiles
-        );
+        this.handleGameKeys();
         player.update(controls, frames, world, player, enemies, projectiles);
 
         // generates new entitites if appropiate
@@ -282,22 +242,24 @@ export class Game {
     }
   }
 
-  private draw(
-    canvas: HTMLCanvasElement,
-    ctx: CanvasRenderingContext2D,
-    debug: Debug,
-    state: GameState,
-    frames: GameFrames,
-    menu: Menu,
-    hud: HUD,
-    sound: Sound,
-    controls: Controls,
-    world: World,
-    player: Player,
-    enemies: Set<Enemy>,
-    projectiles: Set<Projectile>,
-    staticEntities: Set<Entity>
-  ): void {
+  private draw(): void {
+    const {
+      canvas,
+      ctx,
+      debug,
+      state,
+      frames,
+      menu,
+      hud,
+      sound,
+      controls,
+      world,
+      player,
+      enemies,
+      projectiles,
+      staticEntities,
+    } = this;
+
     // dynamic canvas resize
     this.resizeCanvas(canvas);
 
@@ -387,16 +349,9 @@ export class Game {
     canvas.width = canvas.height * constants.canvas.ratio;
   }
 
-  private handleGameKeys(
-    state: GameState,
-    frames: GameFrames,
-    menu: Menu,
-    controls: Controls,
-    world: World,
-    player: Player,
-    enemies: Set<Enemy>,
-    projectiles: Set<Projectile>
-  ) {
+  private handleGameKeys() {
+    const { frames, controls, world, player, enemies, projectiles } = this;
+
     // select next ability
     if (controls.keys.nextAbility) {
       player.selectNextAbility();
@@ -415,13 +370,9 @@ export class Game {
     }
   }
 
-  private handleMiscKeys(
-    state: GameState,
-    frames: GameFrames,
-    menu: Menu,
-    sound: Sound,
-    controls: Controls
-  ) {
+  private handleMiscKeys() {
+    const { state, frames, menu, sound, controls } = this;
+
     // // ---------- PAUSE ----------
     // can buffer key activations during pause
     // seems to not cause issues, otherwise should reset controls.keys
@@ -482,7 +433,6 @@ export class Game {
       console.log("player", this.player);
       console.log("staticEntities", this.staticEntities);
       console.table(this.enemies);
-      // console.table(this.projectiles);
       console.log("projectiles remaining:", this.projectiles.size);
       controls.keys.cancelGameLoop = false;
     }

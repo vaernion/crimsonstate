@@ -66,7 +66,7 @@ export class Debug {
       0
     )} / ${enemies.size}
     $sound ${sound.isMusicToggled ? "music" : ""}
-    ${sound.music?.attributes[1].nodeValue?.split("/music/")[1]}
+    ${sound.music?.attributes[1].nodeValue?.split("/music/")[1] ?? ""}
     `;
     // convert to array to have more than one line in canvas
     const debugInfoLines = debugInfo.split("\n").filter((e) => e !== "");

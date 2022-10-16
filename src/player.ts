@@ -47,14 +47,14 @@ export class Player extends Entity {
   public consumables = new Consumables();
   private headSize = constants.player.headSize; // placeholder until proper images
 
-  constructor(world: World, health: number, maxHealth: number) {
+  constructor(healthMax: number, health: number, position: Vector) {
     super();
     this.type = EntityType.player;
     this.faction = EntityFaction.player;
     this.name = "player";
 
-    this.position.x = world.width / 2;
-    this.position.y = world.height / 2;
+    this.position.x = position.x;
+    this.position.y = position.y;
     this.acceleration = new Vector(
       constants.player.acceleration.x,
       constants.player.acceleration.y
@@ -63,8 +63,8 @@ export class Player extends Entity {
     this.width = constants.player.width;
     this.height = constants.player.height;
 
+    this.maxHealth = healthMax;
     this.health = health;
-    this.maxHealth = maxHealth;
     this.weapon = new Weapon(WeaponName.minigun, 1);
   }
 

@@ -39,6 +39,7 @@ export class Menu {
     if (this.isCoolingDown(frames.realTime)) {
       return;
     }
+
     // up
     if (controls.keys.up) {
       this.selectedItemIndex =
@@ -53,7 +54,7 @@ export class Menu {
     }
     // activate
     if (controls.keys.space) {
-      this.menuItems[this.menuPage][this.selectedItemIndex].onactivation();
+      this.menuItems[this.menuPage][this.selectedItemIndex].onActivation();
     }
     // resume game
     else if (
@@ -168,7 +169,8 @@ export class Menu {
     ctx.fillText(
       this.sound.isMusicToggled ? "on" : "off",
       canvas.width * 0.25,
-      canvas.height * 0.328
+      canvas.height * 0.328,
+      canvas.width * 0.7
     );
   }
 
@@ -267,10 +269,10 @@ export class Menu {
 
 class MenuItem {
   public label: string;
-  public onactivation: () => void;
+  public onActivation: () => void;
 
-  constructor(label: string, onactivation: () => void) {
+  constructor(label: string, onActivation: () => void) {
     this.label = label;
-    this.onactivation = onactivation;
+    this.onActivation = onActivation;
   }
 }

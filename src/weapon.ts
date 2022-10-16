@@ -19,7 +19,6 @@ export class WeaponPickup extends Entity {
     this.type = EntityType.weaponPickup;
     this.weapon = new Weapon(weaponName, ammoFraction);
     this.name = this.weapon.name;
-    this.position = position;
     this.width = this.weapon.width;
     this.height = this.weapon.height;
     this.color = this.weapon.color;
@@ -71,9 +70,9 @@ export class WeaponPickup extends Entity {
 }
 
 export class Weapon implements WeaponVariant {
-  lastAttackTime: number = 0;
+  lastAttackTime: number = Number.MIN_SAFE_INTEGER;
   isReloading: boolean = false;
-  reloadStartedTime: number = 0;
+  reloadStartedTime: number = Number.MIN_SAFE_INTEGER;
   reloadTime: number;
 
   name: WeaponName;
@@ -162,20 +161,18 @@ export class Weapon implements WeaponVariant {
     return this.reloadStartedTime + this.reloadTime <= gameTime;
   }
 
-  public checkReload(gameTime: number): void {
+  public checkReload(gameTime: number): boolean {
     if (this.isReloading && this.isReloadDone(gameTime)) {
-      this.finishReload();
+      this.isReloading = false;
+      const ammoReloaded = Math.min(
+        this.ammo,
+        this.magazineMax,
+        this.magazineMax - this.magazine
+      );
+      this.magazine += ammoReloaded;
+      this.ammo -= ammoReloaded;
+      return true;
     }
-  }
-
-  public finishReload(): void {
-    this.isReloading = false;
-    const ammoReloaded = Math.min(
-      this.ammo,
-      this.magazineMax,
-      this.magazineMax - this.magazine
-    );
-    this.magazine += ammoReloaded;
-    this.ammo -= ammoReloaded;
+    return false;
   }
 }

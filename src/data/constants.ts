@@ -12,8 +12,8 @@ export const constants = {
     width: 20,
     height: 35,
     headSize: 10,
+    healthMax: 200,
     health: 100,
-    maxHealth: 200,
     acceleration: {
       x: 1.1,
       y: 1.1,
